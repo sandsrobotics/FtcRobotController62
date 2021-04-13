@@ -236,7 +236,7 @@ class GrabberSettings
     protected double motorPower = .75;
 
     //preset lifter functions
-    protected int capturePos = 1425; //positionTracker of grabber arm when grabbing a wobble goal
+    protected int capturePos = 1375; //positionTracker of grabber arm when grabbing a wobble goal
     protected int horizontalPos = 0; //positionTracker of grabber arm when in storage
     protected int putOverPos = 1000; //positionTracker of grabber arm to put the wobble goal over the wall
     protected int restPos = 1500; //positionTracker of grabber arm when at rest on the side of robot
@@ -248,7 +248,7 @@ class GrabberSettings
     protected double servoIntakeSpeed = 1;
     protected double servoOuttakeSpeed = -1;
     protected int outtakeTime = 300;
-    protected int maxIntakeTime = 1000;
+    protected int maxIntakeTime = 10000;
 
     //controls
     protected GamepadButtonManager moveGrabberStick = new GamepadButtonManager(null);//manual adjust of grabber

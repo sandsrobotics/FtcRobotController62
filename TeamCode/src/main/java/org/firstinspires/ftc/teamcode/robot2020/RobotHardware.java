@@ -339,7 +339,7 @@ class HardwareSettings
     protected String launcherGateServoNum = "4B";
 
     //grabber motors
-    protected boolean[] flipGrabberMotorDir = {true, false, false};
+    protected boolean[] flipGrabberMotorDir = {true, false, true};
     protected String grabberLifterMotorNum = "2B";
     protected String grabberLeftServoNum = "1B";
     protected String grabberRightServoNum = "2B";
