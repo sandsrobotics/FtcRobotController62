@@ -1,0 +1,8 @@
+repositories {
+    maven { url = 'https://maven.0x778.tk' }
+}
+
+dependencies {
+    // There should be a bunch of implementation configurations here already
+    implementation 'com.spartronics4915.lib:ftc265:2.1.8'
+}
