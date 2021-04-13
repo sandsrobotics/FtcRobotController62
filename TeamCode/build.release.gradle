@@ -1,0 +1,20 @@
+repositories {
+    mavenCentral()
+    google() // Needed for androidx
+    jcenter()  // Needed for tensorflow-lite
+    flatDir {
+        dirs rootProject.file('libs')
+    }
+    maven { url = 'https://maven.brott.dev/' }
+    maven { url = 'https://maven.0x778.tk' }
+}
+dependencies {
+    implementation project(':FtcRobotController')
+    implementation 'org.firstinspires.ftc:RobotCore:6.2.1'
+    implementation 'org.firstinspires.ftc:Hardware:6.2.1'
+    implementation 'org.firstinspires.ftc:FtcCommon:6.2.1'
+    //implementation (name: 'tfod-release', ext:'aar')
+    //implementation (name: 'tensorflow-lite-0.0.0-nightly', ext:'aar')
+    implementation 'com.acmerobotics.dashboard:dashboard:0.3.10'
+    implementation 'com.spartronics4915.lib:ftc265:2.1.8'
+}
