@@ -331,7 +331,7 @@ public class Launcher {
     }
 
     void setFrogLegPos(int pos, boolean delayBetween){
-        if(pos == 0 && robot.grabber != null && robot.grabber.setEncoderPos < robot.grabber.grabberSettings.straitUpPos){
+        if(pos == 0 && robot.grabber != null && robot.grabber.getEncoderSetPos() < robot.grabber.grabberSettings.straitUpPos){
             robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
         }
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
