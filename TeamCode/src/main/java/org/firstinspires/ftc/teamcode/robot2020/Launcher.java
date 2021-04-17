@@ -117,13 +117,13 @@ public class Launcher {
     void setFrogLegServos(Gamepad gamepad){
         if(launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
             frogLegPos = 0;
-            if(lastfrogLegPos != frogLegPos) setFrogLegPos(true);
+            if(lastfrogLegPos != frogLegPos) setFrogLegPos(false);
         }
         else if(launcherSettings.frogLegToggleButton.getButtonPressed(gamepad)) {
             if(frogLegPos != 2) frogLegPos = 2;
             else frogLegPos = 1;
 
-            if(lastfrogLegPos != frogLegPos) setFrogLegPos(true);
+            if(lastfrogLegPos != frogLegPos) setFrogLegPos(false);
         }
     }
 
@@ -420,7 +420,7 @@ class LauncherSettings
     {.5,.5},
     {.7,.7},
     {.9,.9}};
-    int delayBetweenFrogLegs = 10;
+    int delayBetweenFrogLegs = 30;
 
     //other
     double startRPM = autoLaunchRPM;
