@@ -71,9 +71,12 @@ public class Autonomous extends LinearOpMode {
     {
         RobotUsage ru = new RobotUsage();
         ru.useComplexMovement = false;
+
         ru.visionUsage.useTensorFlowInTread = false;
         ru.visionUsage.useOpenCV = false;
         ru.visionUsage.useVuforiaInThread = false;
+        
+        ru.positionUsage.usePositionCamera = false;
 
         /////////
         //start//
@@ -105,6 +108,7 @@ public class Autonomous extends LinearOpMode {
         if(isStopRequested()) return;
 
         robot.start(false, true);
+        robot.positionTracker.waitForPositionInitialization();
 
         ////////////////
         //main program//

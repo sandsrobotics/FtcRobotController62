@@ -22,6 +22,7 @@ public class PositionTracker extends Thread
     ///////////////////
     //robot positionTracker
     protected volatile Position currentPosition; //positionTracker is based on the canter front of the goal to the center of the robot
+    volatile boolean isInitialized = false;
 
     //wheels
     private int[] lastMotorPos;
@@ -256,6 +257,7 @@ public class PositionTracker extends Thread
         initializeCurrentPosition();
         if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
         if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(currentPosition);
+        isInitialized = true;
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
             if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
@@ -301,6 +303,12 @@ public class PositionTracker extends Thread
         if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
 
         writePositionToFile();
+    }
+
+    void waitForPositionInitialization(){
+        while(!isInitialized){
+            robot.delay(1);
+        }
     }
 
     double[] getPositionWithOffsetArray(double X, double Y, double R) {
