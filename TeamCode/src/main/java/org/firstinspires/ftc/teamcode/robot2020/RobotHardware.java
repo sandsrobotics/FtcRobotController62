@@ -345,7 +345,7 @@ class HardwareSettings
     protected String rightBottomMotorNum = "3";
 
     //launcher motors
-    protected boolean[] flipLauncherMotorDir = {true, true, false, false, false, false};
+    protected boolean[] flipLauncherMotorDir = {true, true, false, false, false, true};
     protected String launcherWheelMotorNum = "0B";
     public static PIDFCoefficients launcherWheelMotorPID = new PIDFCoefficients(100,0,0,12.4);
     protected String launcherIntakeMotorNum = "1B";
