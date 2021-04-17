@@ -74,6 +74,9 @@ public class DriverControl extends LinearOpMode
                 if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
                 else robot.movement.setSpeedMultiplier(1);
 
+                float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
+                robot.addTelemetry("dist 1", dist[0]);
+                robot.addTelemetry("dist 2", dist[1]);
 
                 robot.sendTelemetry();
             }
