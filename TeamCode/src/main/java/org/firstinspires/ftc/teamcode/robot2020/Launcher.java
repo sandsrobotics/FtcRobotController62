@@ -21,9 +21,10 @@ public class Launcher {
 
     //other
     boolean shutdownWheel = true;
-    boolean moveIntakeMotorForward = false;
     boolean gateOpen = false;
     float intakeMotorPower = 0;
+    int frogLegPos = 0; //0 = rest, 1 = ready, 2 = down
+    int lastfrogLegPos = 0;
     double targetWheelRpm;
     Robot robot;
     LauncherSettings launcherSettings;
@@ -101,19 +102,29 @@ public class Launcher {
 
     void setLauncherIntakeMotor(Gamepad gamepad)
     {
-        intakeMotorPower = 0;
-
-        if(launcherSettings.intakeInButton.getButtonPressed(gamepad)) moveIntakeMotorForward = !moveIntakeMotorForward;
-        if(launcherSettings.intakeOutSlider.getSliderValue(gamepad) > launcherSettings.sliderTolerance){
-            moveIntakeMotorForward = false;
+        if(launcherSettings.intakeInButton.getButtonPressed(gamepad)){
+            if(intakeMotorPower == 1) intakeMotorPower = 0;
+            else intakeMotorPower = 1;
+        }
+        else if(launcherSettings.intakeOutSlider.getButtonHeld(gamepad)){
             intakeMotorPower = -launcherSettings.intakeOutSlider.getSliderValue(gamepad);
         }
-        if(moveIntakeMotorForward) intakeMotorPower = 1;
+        else if(launcherSettings.intakeOutSlider.getButtonReleased(gamepad)) intakeMotorPower = 0;
 
         robot.robotHardware.launcherIntakeMotor.setPower(intakeMotorPower);
+    }
 
-        //if(intakeMotorPower != 0) robot.robotHardware.launcherIntakeServo.setPower(1);
-        //else robot.robotHardware.launcherIntakeServo.setPower(0);
+    void setFrogLegServos(Gamepad gamepad){
+        if(launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
+            frogLegPos = 0;
+            if(lastfrogLegPos != frogLegPos) setFrogLegPos(true);
+        }
+        else if(launcherSettings.frogLegToggleButton.getButtonPressed(gamepad)) {
+            if(frogLegPos != 2) frogLegPos = 2;
+            else frogLegPos = 1;
+
+            if(lastfrogLegPos != frogLegPos) setFrogLegPos(true);
+        }
     }
 
     void runForTeleOp(Gamepad gamepad, boolean telemetry)
@@ -121,6 +132,7 @@ public class Launcher {
         setLauncherServos(gamepad);
         setLauncherWheelMotor(gamepad);
         setLauncherIntakeMotor(gamepad);
+        setFrogLegServos(gamepad);
         if(telemetry)telemetryDataOut();
     }
 
@@ -159,7 +171,7 @@ public class Launcher {
                 waitForRPMInTolerance(1000);
                 autoLaunch();
             }
-            moveIntakeMotorForward = true;
+            intakeMotorPower = 1;
             shutdownWheel = true;
             closeGateServo();
         }
@@ -315,6 +327,29 @@ public class Launcher {
             robot.delay(launcherSettings.launcherServoMoveTime);
         }
     }
+
+    void setFrogLegPos(int pos, boolean delayBetween){
+        if(pos == 0 && robot.grabber != null){
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
+        }
+        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
+        if(delayBetween) robot.delay(launcherSettings.delayBetweenFrogLegs);
+        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[pos][1]);
+        lastfrogLegPos = pos;
+    }
+
+    void setFrogLegPos(boolean delayBetween){
+        setFrogLegPos(frogLegPos, delayBetween);
+    }
+
+    void initFrogLegs(){
+        robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[0][0]);
+        robot.delay(launcherSettings.delayBetweenFrogLegs);
+        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[0][1]);
+    }
+
+
 }// class end
 
 class LauncherSettings
@@ -334,8 +369,10 @@ class LauncherSettings
     //intake
     GamepadButtonManager intakeInButton = new GamepadButtonManager(GamepadButtons.rightBUMPER);
     GamepadButtonManager intakeOutSlider = new GamepadButtonManager(GamepadButtons.rightTRIGGER);
+    //frog Leg
+    GamepadButtonManager frogLegStowButton = new GamepadButtonManager(GamepadButtons.B);
+    GamepadButtonManager frogLegToggleButton = new GamepadButtonManager(GamepadButtons.X);
 
-    double sliderTolerance = .05;
     int buttonHoldTime = 500;
 
     //motor config
@@ -378,9 +415,16 @@ class LauncherSettings
         new Position(24, minLaunchDistance, 7)
     };
 
+    //frog legs
+    double[][] FrogLegPos = {
+    {0,0},
+    {0,0},
+    {0,0}};
+    int delayBetweenFrogLegs = 10;
+
     //other
     double startRPM = autoLaunchRPM;
-    double RPMIncrements = 50;
+    double RPMIncrements = 0;
     double RPMTolerance = 150;
 
     LauncherSettings(){}

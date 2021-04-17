@@ -115,6 +115,9 @@ public class Vision extends Thread
     void initAll() //the method above but it takes values from RobotUsage
     {
         initAll(robot.robotUsage.visionUsage.useVuforia, robot.robotUsage.visionUsage.useOpenCV, robot.robotUsage.visionUsage.useTensorFlow);
+        robot.robotHardware.initVisionHardware();
+        robot.robotHardware.mainCamServo.setPosition(visionSettings.camServoStartPos);
+
     }
 
     void initCamera() //gets the camera Id to make initialization easier for vision objects
@@ -677,6 +680,9 @@ class VisionSettings
     protected final String LABEL_FIRST_ELEMENT = "QUAD";
     protected final String LABEL_SECOND_ELEMENT = "SINGLE";
     protected final float minResultConfidence = .5f; //how confident does the model have to be to say there is a ring
+
+    //main cam servo
+    double camServoStartPos = 1;
 
     VisionSettings(){}
 }

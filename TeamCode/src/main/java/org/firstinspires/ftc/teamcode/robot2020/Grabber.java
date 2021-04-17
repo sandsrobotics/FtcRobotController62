@@ -236,10 +236,11 @@ class GrabberSettings
     protected double motorPower = .75;
 
     //preset lifter functions
-    protected int capturePos = 1375; //positionTracker of grabber arm when grabbing a wobble goal
-    protected int horizontalPos = 0; //positionTracker of grabber arm when in storage
-    protected int putOverPos = 1000; //positionTracker of grabber arm to put the wobble goal over the wall
-    protected int restPos = 1500; //positionTracker of grabber arm when at rest on the side of robot
+    protected int capturePos = 1375; //position of grabber arm when grabbing a wobble goal
+    protected int horizontalPos = 0; //position of grabber arm when in storage
+    protected int putOverPos = 1000; //position of grabber arm to put the wobble goal over the wall
+    protected int restPos = 1500; //position of grabber arm when at rest on the side of robot
+    protected int straitUpPos = 500; //position of grabber arm when strait up from the robot
 
     //servo pos
     //protected double[] servoRestPositions = {.2, .6};

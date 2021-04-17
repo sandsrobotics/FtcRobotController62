@@ -123,10 +123,8 @@ public class Robot
         if(robotUsage.positionUsage.useThread()) positionTracker.start();
         if(robotUsage.visionUsage.useThread()) vision.start();
 
-        if(robotUsage.useGrabber && resetGrabberPos)
-        {
-            grabber.initGrabberPos();
-        }
+        if(robotUsage.useGrabber && resetGrabberPos) grabber.initGrabberPos();
+        if(robotUsage.useLauncher) launcher.initFrogLegs();
     }
 
     /////////////

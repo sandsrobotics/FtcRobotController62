@@ -28,6 +28,7 @@ public class RobotHardware
     protected Servo launcherLaunchServo;
     protected Servo launcherGateServo;
     //protected CRServo launcherIntakeServo;
+    protected Servo launcherFrogArmLeft, launcherFrogArmRight;
 
     //grabber
     protected DcMotorEx grabberLifterMotor;
@@ -37,6 +38,9 @@ public class RobotHardware
     protected List<CRServo> grabberServos;
     protected DigitalChannel grabberArmLimitSwitch;
     protected DigitalChannel grabberIntakeLimitSwitch;
+
+    //camers
+    protected Servo mainCamServo;
 
     //ultrasonic
     protected List<DFR304Range> distSensors;
@@ -89,11 +93,15 @@ public class RobotHardware
         launcherLaunchServo = robot.hardwareMap.servo.get("servo" + hardwareSettings.launcherLaunchServoNum);
         launcherGateServo = robot.hardwareMap.servo.get("servo" + hardwareSettings.launcherGateServoNum);
         //launcherIntakeServo = robot.hardwareMap.crservo.get("servo" + hardwareSettings.launcherIntakeServoNum);
+        launcherFrogArmLeft = robot.hardwareMap.servo.get("servo" + hardwareSettings.launcherFrogArmLeftNum);
+        launcherFrogArmRight = robot.hardwareMap.servo.get("servo" + hardwareSettings.launcherFrogArmRightNum);
 
         if(hardwareSettings.flipLauncherMotorDir[0]) launcherWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         if(hardwareSettings.flipLauncherMotorDir[1]) launcherIntakeMotor.setDirection(DcMotor.Direction.REVERSE);
         if(hardwareSettings.flipLauncherMotorDir[2]) launcherLaunchServo.setDirection(Servo.Direction.REVERSE);
         if(hardwareSettings.flipLauncherMotorDir[3]) launcherGateServo.setDirection(Servo.Direction.REVERSE);
+        if(hardwareSettings.flipLauncherMotorDir[4]) launcherFrogArmLeft.setDirection(Servo.Direction.REVERSE);
+        if(hardwareSettings.flipLauncherMotorDir[5]) launcherFrogArmRight.setDirection(Servo.Direction.REVERSE);
         //if(hardwareSettings.flipLauncherMotorDir[3]) launcherIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
 
         initMotorSettings(launcherWheelMotor, DcMotor.ZeroPowerBehavior.FLOAT);
@@ -129,6 +137,12 @@ public class RobotHardware
 
         grabberIntakeLimitSwitch = robot.hardwareMap.get(DigitalChannel.class, hardwareSettings.grabberIntakeLimitSwitchName);
         grabberIntakeLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
+    }
+
+    public void initVisionHardware()
+    {
+        mainCamServo = robot.hardwareMap.servo.get("servo" + hardwareSettings.mainCamServoNum);
+        if(hardwareSettings.flipMainCamServoDir) mainCamServo.setDirection(Servo.Direction.REVERSE);
     }
 
     public void initUltrasonicSensors()
@@ -331,12 +345,14 @@ class HardwareSettings
     protected String rightBottomMotorNum = "3";
 
     //launcher motors
-    protected boolean[] flipLauncherMotorDir = {true, true, false, false};
+    protected boolean[] flipLauncherMotorDir = {true, true, false, false, false, false};
     protected String launcherWheelMotorNum = "0B";
     public static PIDFCoefficients launcherWheelMotorPID = new PIDFCoefficients(100,0,0,12.4);
     protected String launcherIntakeMotorNum = "1B";
     protected String launcherLaunchServoNum = "0B";
     protected String launcherGateServoNum = "4B";
+    protected String launcherFrogArmLeftNum = "1";
+    protected String launcherFrogArmRightNum = "0";
 
     //grabber motors
     protected boolean[] flipGrabberMotorDir = {true, false, true};
@@ -345,6 +361,10 @@ class HardwareSettings
     protected String grabberRightServoNum = "2B";
     protected String grabberArmLimitSwitchName = "digital0B";
     protected String grabberIntakeLimitSwitchName = "digital1B";
+
+    //camera
+    protected boolean flipMainCamServoDir = false;
+    protected String mainCamServoNum = "5B";
 
     //ultrasonic
     protected String Ultrasonic1Num = "0B";
