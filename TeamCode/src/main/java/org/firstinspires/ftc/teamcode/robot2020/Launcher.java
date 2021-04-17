@@ -294,6 +294,7 @@ public class Launcher {
 
     void moveLaunchServo(long actuatorTime)
     {
+        if(frogLegPos == 0) setFrogLegPos(2, false);
         robot.robotHardware.launcherLaunchServo.setPosition(launcherSettings.launcherServoLaunchAngle);
         robot.delay(actuatorTime);
         robot.robotHardware.launcherLaunchServo.setPosition(launcherSettings.launcherServoRestAngle);
@@ -340,7 +341,7 @@ public class Launcher {
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
         if(delayBetween) robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[pos][1]);
-
+        frogLegPos = pos;
         lastfrogLegPos = pos;
     }
 
