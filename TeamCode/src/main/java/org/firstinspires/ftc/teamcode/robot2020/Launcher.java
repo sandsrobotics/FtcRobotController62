@@ -329,7 +329,7 @@ public class Launcher {
     }
 
     void setFrogLegPos(int pos, boolean delayBetween){
-        if(pos == 0 && robot.grabber != null){
+        if(pos == 0 && robot.grabber != null && robot.grabber.setEncoderPos < robot.grabber.grabberSettings.straitUpPos){
             robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
         }
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
@@ -417,9 +417,9 @@ class LauncherSettings
 
     //frog legs
     double[][] FrogLegPos = {
-    {.25,.25},
+    {.5,.5},
     {.7,.7},
-    {.8,.8}};
+    {.9,.9}};
     int delayBetweenFrogLegs = 10;
 
     //other
