@@ -682,7 +682,7 @@ class VisionSettings
     protected final float minResultConfidence = .5f; //how confident does the model have to be to say there is a ring
 
     //main cam servo
-    double camServoStartPos = 1;
+    double camServoStartPos = .2;
 
     VisionSettings(){}
 }

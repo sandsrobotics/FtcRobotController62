@@ -417,9 +417,9 @@ class LauncherSettings
 
     //frog legs
     double[][] FrogLegPos = {
-    {0,0},
-    {0,0},
-    {0,0}};
+    {.25,.25},
+    {.7,.7},
+    {.8,.8}};
     int delayBetweenFrogLegs = 10;
 
     //other
