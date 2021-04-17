@@ -39,7 +39,7 @@ public class Test3 extends LinearOpMode {
 
         waitForStart();
 
-        robot.start(false);
+        robot.start(false, false);
 
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.restPos, false);
         robot.robotUsage.positionUsage.useDistanceSensors = true;

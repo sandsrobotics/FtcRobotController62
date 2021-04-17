@@ -117,14 +117,14 @@ public class Robot
 
     //------------------My Methods------------------//
 
-    void start(boolean resetGrabberPos)
+    void start(boolean resetGrabberPos, boolean isAuto)
     {
         startTelemetry();
         if(robotUsage.positionUsage.useThread()) positionTracker.start();
         if(robotUsage.visionUsage.useThread()) vision.start();
 
         if(robotUsage.useGrabber && resetGrabberPos) grabber.initGrabberPos();
-        if(robotUsage.useLauncher) launcher.initFrogLegs();
+        if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs();
     }
 
     /////////////

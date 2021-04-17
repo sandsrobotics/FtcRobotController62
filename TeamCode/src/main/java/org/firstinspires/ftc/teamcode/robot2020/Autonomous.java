@@ -102,7 +102,7 @@ public class Autonomous extends LinearOpMode {
 
         if(isStopRequested()) return;
 
-        robot.start(false);
+        robot.start(false, true);
 
         ////////////////
         //main program//

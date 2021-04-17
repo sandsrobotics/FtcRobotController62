@@ -39,7 +39,7 @@ public class Test5 extends LinearOpMode {
 
         waitForStart();
 
-        robot.start(true);
+        robot.start(true, false);
         slamra = new T265Camera(cameraToRobot, encoderMeasurementCovariance, hardwareMap.appContext);
         slamra.setPose(startingPose);
         slamra.start();

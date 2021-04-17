@@ -81,7 +81,7 @@ public class AutonomousMovement extends LinearOpMode {
 
         waitForStart();
 
-        robot.start(false);
+        robot.start(false, true);
 
         ////////////////
         //main program//

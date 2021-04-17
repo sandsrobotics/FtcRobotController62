@@ -35,7 +35,7 @@ public class Test2 extends LinearOpMode
         waitForStart();
 
         autoLaunchButton = new GamepadButtonManager(gamepad1, GamepadButtons.dpadUP);
-        robot.start(true);
+        robot.start(true, false);
 
         while (opModeIsActive())
         {

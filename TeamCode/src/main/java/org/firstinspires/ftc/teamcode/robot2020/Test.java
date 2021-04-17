@@ -26,7 +26,7 @@ public class Test extends LinearOpMode {
 
         waitForStart();
 
-        robot.start(true);
+        robot.start(true, false);
 
         while (opModeIsActive())
         {

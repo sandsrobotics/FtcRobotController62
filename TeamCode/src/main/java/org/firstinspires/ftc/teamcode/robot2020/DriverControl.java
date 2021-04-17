@@ -48,7 +48,7 @@ public class DriverControl extends LinearOpMode
         speedToggle = new GamepadButtonManager(gamepad1, GamepadButtons.leftTRIGGER);
         speedToggle.minSliderVal = 0.3;
 
-        robot.start(true);
+        robot.start(true, false);
 
         while (opModeIsActive())
         {
