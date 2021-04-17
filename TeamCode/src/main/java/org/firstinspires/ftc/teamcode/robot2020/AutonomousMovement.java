@@ -70,12 +70,13 @@ public class AutonomousMovement extends LinearOpMode {
         ru.useDrive = true;
         ru.positionUsage.usePosition = true;
         ru.positionUsage.usePositionThread = true;
-        ru.positionUsage.usePositionCamera = true;
+        ru.positionUsage.useDistanceSensors = true;
 
         /////////
         //start//
         /////////
         robot = new Robot(this, ru);
+        //robot.positionTracker.positionSettings.startPosMode = 1;
 
         robot.startTelemetry();
 
@@ -134,7 +135,7 @@ public class AutonomousMovement extends LinearOpMode {
         //park
         robot.movement.moveToPosition(parkPos,robot.movement.movementSettings.finalPosSettings);
 
-        robot.positionTracker.writeRotationToFile();
+        robot.positionTracker.writePositionToFile();
     }
 
     void goToDropZone(int pos, int goalNum)

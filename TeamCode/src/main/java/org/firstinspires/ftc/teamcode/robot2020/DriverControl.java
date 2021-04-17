@@ -29,11 +29,10 @@ public class DriverControl extends LinearOpMode
         RobotUsage ru = new RobotUsage();
         ru.visionUsage.useVuforia = false;
         ru.useComplexMovement = false;
-        ru.visionUsage.useTensorFlow = false;
+        //ru.visionUsage.useTensorFlow = false;
 
         robot = new Robot(this, ru);
-        if(!robot.positionTracker.updateRotFromFile()) robot.positionTracker.positionSettings.startPos.R = -90;
-        robot.positionTracker.initVals();
+
 
         waitForStart();
 

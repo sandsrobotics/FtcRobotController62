@@ -54,38 +54,13 @@ public class PositionTracker extends Thread
     {
         positionSettings = new PositionSettings();
         this.robot = robot;
-        initVals();
         if(robot.robotUsage.positionUsage.usePositionCamera) initCam();
     }
     PositionTracker(Robot robot, PositionSettings positionSettings)
     {
         this.positionSettings = positionSettings;
         this.robot = robot;
-        initVals();
         if(robot.robotUsage.positionUsage.usePositionCamera) initCam();
-    }
-
-    void initVals()
-    {
-        if(positionSettings.resetPos)
-        {
-            currentPosition = positionSettings.startPos;
-            rotationOffset = -positionSettings.startPos.R;
-        }
-        else
-        {
-            currentPosition = new Position();
-            rotationOffset = 0;
-        }
-    }
-
-    public boolean updateRotFromFile(){
-        String val = FileManager.readFromFile(fileName, AppUtil.getDefContext());
-        try {
-            positionSettings.startPos.R = Double.parseDouble(val);
-            return true;
-        }
-        catch(Exception e){return false;}
     }
 
     //////////
@@ -235,15 +210,40 @@ public class PositionTracker extends Thread
 
     void endCam() {slamra.stop();}
 
+    /////////
+    //files//
+    /////////
+    public Position getPositionFromFile(){
+        String val = FileManager.readFromFile(fileName, AppUtil.getDefContext());
+        try {
+            String[] vals = val.split(",");
+            return new Position(Double.parseDouble(vals[0]), Double.parseDouble(vals[1]), Double.parseDouble(vals[2]));
+        }
+        catch(Exception e){return null;}
+    }
+    void writePositionToFile(){
+        FileManager.writeToFile(fileName, currentPosition.X + "," + currentPosition.Y + "," + currentPosition.R, AppUtil.getDefContext());
+    }
+
     //////////////////
     //runs in thread//
     //////////////////
+    void initializeCurrentPosition()
+    {
+        if(positionSettings.startPosMode != 1) positionSettings.startPos = new Position();
+        if(positionSettings.startPosMode == 2) {
+            Position filePos = getPositionFromFile();
+            if(filePos != null) positionSettings.startPos = filePos;
+        }
+        currentPosition = positionSettings.startPos;
+    }
+
     void initializeEncoderTracking()
     {
         currMotorPos = robot.robotHardware.getMotorPositionsList(robot.robotHardware.driveMotors);
     }
 
-    void updateAll()
+    void updateRot()
     {
         currentAngularVelocity = robot.imu.getAngularVelocity();
         currentAllAxisRotations = updateAngles();
@@ -253,15 +253,36 @@ public class PositionTracker extends Thread
     @Override
     public void run()
     {
-        if(robot.robotUsage.positionUsage.positionTrackingEnabled()) {
-            if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
-            if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(currentPosition);
-        }
+        initializeCurrentPosition();
+        if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
+        if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(currentPosition);
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
-
-            updateAll();
+            if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
             if(robot.robotUsage.positionUsage.usePositionCamera) updatePosFromCam();
+            if(robot.robotUsage.positionUsage.useDistanceSensors)
+            {
+                inMeasuringRange = isRobotInRotationRange();
+
+                if(inMeasuringRange > -2) {
+                    updateDistanceSensor(1);
+                }
+
+                updateRot();
+
+                if(inMeasuringRange > -2)
+                {
+                    updateDistanceSensor(2);
+                }
+
+                if(inMeasuringRange > -2)
+                {
+                    updatePosWithDistanceSensor(false);
+                }
+
+            }
+            else updateRot();
+
             if(drawDashboardField){
                 Canvas field = robot.packet.fieldOverlay();
                 double robotRadius = 3;
@@ -275,43 +296,11 @@ public class PositionTracker extends Thread
                 double x2 = translation.getX() + arrowX, y2 = translation.getY() + arrowY;
                 field.strokeLine(x1, y1, x2, y2);
             }
-            /*
-            //put run stuff in here
-            inMeasuringRange = isRobotInRotationRange();
-
-            if(inMeasuringRange > -2) {
-                updateDistanceSensor(1);
-            }
-
-            updateAll();
-
-            if(robot.robotUsage.positionUsage.positionTrackingEnabled() && robot.robotUsage.positionUsage.useDistanceSensors)
-            {
-                if(inMeasuringRange > -2)
-                {
-                    updateDistanceSensor(2);
-                }
-
-                getPosFromEncoder();
-
-                if(inMeasuringRange > -2)
-                {
-                   updatePosWithDistanceSensor(false);
-                }
-            }
-        }
-         */
         }
 
-        if(robot.robotUsage.positionUsage.positionTrackingEnabled()) {
-            if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
-        }
+        if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
 
-        writeRotationToFile();
-    }
-
-    void writeRotationToFile(){
-        FileManager.writeToFile(fileName, Double.toString(currentPosition.R), AppUtil.getDefContext());
+        writePositionToFile();
     }
 
     double[] getPositionWithOffsetArray(double X, double Y, double R) {
@@ -343,7 +332,7 @@ class PositionSettings
     //user variables//
     //////////////////
     //positionTracker start
-    boolean resetPos = true; //if you want to reset the positionTracker or set all values to 0
+    short startPosMode = 2; //0 = set all to 0, 1 = use variable below, 2 = use file
     Position startPos = new Position(-20, -124, 0);
 
     //wheel ticks

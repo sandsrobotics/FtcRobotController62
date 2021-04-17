@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -154,7 +155,7 @@ public class Grabber {
         setEncoderPos = pos;
         if (setEncoderPos > grabberSettings.maxMotorPos) setEncoderPos = grabberSettings.maxMotorPos;
         else if (setEncoderPos < grabberSettings.minMotorPos) setEncoderPos = grabberSettings.minMotorPos;
-        if(robot.launcher != null && robot.launcher.frogLegPos == 0 && setEncoderPos < grabberSettings.straitUpPos) setEncoderPos = grabberSettings.straitUpPos;
+        //if(robot.launcher != null && robot.launcher.frogLegPos == 0 && setEncoderPos < grabberSettings.straitUpPos) setEncoderPos = grabberSettings.straitUpPos;
     }
 
     int getEncoderSetPos(){
@@ -165,12 +166,12 @@ public class Grabber {
     {
         if(!robot.robotHardware.grabberArmLimitSwitch.getState() && getEncoderSetPos() <= 5)
         {
-            if(!motorReset)
-            {
+           // if(!motorReset)
+           // {
                 robot.robotHardware.grabberLifterMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 robot.robotHardware.grabberLifterMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorReset = true;
-            }
+            //}
             if(robot.robotHardware.grabberLifterMotor.getPower() != 0) robot.robotHardware.grabberLifterMotor.setPower(0);
             return true;
         }
@@ -240,15 +241,15 @@ class GrabberSettings
     ////////////////
     //user defined//
     ////////////////
-    protected int maxMotorPos = 1600;
+    protected int maxMotorPos = 1450;
     protected int minMotorPos = -50;
-    protected double motorPower = .75;
+    protected double motorPower = .5;
 
     //preset lifter functions
-    protected int capturePos = 1375; //position of grabber arm when grabbing a wobble goal
+    protected int capturePos = 1400; //position of grabber arm when grabbing a wobble goal
     protected int horizontalPos = -50; //position of grabber arm when in storage
-    protected int putOverPos = 1000; //position of grabber arm to put the wobble goal over the wall
-    protected int restPos = 1500; //position of grabber arm when at rest on the side of robot
+    protected int putOverPos = 950; //position of grabber arm to put the wobble goal over the wall
+    protected int restPos = 1450; //position of grabber arm when at rest on the side of robot
     protected int straitUpPos = 500; //position of grabber arm when strait up from the robot
 
     //servo pos

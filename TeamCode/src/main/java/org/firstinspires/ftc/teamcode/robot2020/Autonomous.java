@@ -80,6 +80,8 @@ public class Autonomous extends LinearOpMode {
         /////////
         robot = new Robot(this, ru);
 
+        robot.positionTracker.positionSettings.startPosMode = 1;
+
         robot.vision.tofdActivationSequence();
         robot.startTelemetry();
 
@@ -161,7 +163,7 @@ public class Autonomous extends LinearOpMode {
         //park
         robot.movement.moveToPosition(parkPos,robot.movement.movementSettings.finalPosSettings);
 
-        robot.positionTracker.writeRotationToFile();
+        robot.positionTracker.writePositionToFile();
     }
 
 

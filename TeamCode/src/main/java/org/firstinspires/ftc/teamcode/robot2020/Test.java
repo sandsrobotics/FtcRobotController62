@@ -19,7 +19,7 @@ public class Test extends LinearOpMode {
         ru.setAllToValue(false);
         ru.positionUsage.usePositionThread = true;
         ru.positionUsage.usePosition = true;
-        ru.positionUsage.usePositionCamera = true;
+        ru.positionUsage.useDistanceSensors = true;
         ru.useDrive = true;
 
         robot = new Robot(this, ru);

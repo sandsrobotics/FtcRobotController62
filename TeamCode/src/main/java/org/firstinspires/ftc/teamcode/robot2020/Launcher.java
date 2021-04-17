@@ -335,9 +335,9 @@ public class Launcher {
     //frog legs//
     /////////////
     void setFrogLegPos(int pos, boolean delayBetween){
-        if(pos == 0 && robot.grabber != null && robot.grabber.getEncoderSetPos() < robot.grabber.grabberSettings.straitUpPos){
-            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
-        }
+        //if(pos == 0 && robot.grabber != null && robot.grabber.getEncoderSetPos() < robot.grabber.grabberSettings.straitUpPos){
+        //    robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
+        //}
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
         if(delayBetween) robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[pos][1]);
@@ -350,10 +350,12 @@ public class Launcher {
     }
 
     void initFrogLegs(){
-        robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+       if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[0][0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[0][1]);
+        robot.delay(launcherSettings.timeToOpenFrogLegs);
+        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
     }
 
 
@@ -389,13 +391,13 @@ class LauncherSettings
 
     //launcher servo
     double launcherServoRestAngle = 0;
-    double launcherServoLaunchAngle = 1;
-    int launcherServoMoveTime = 250;
+    double launcherServoLaunchAngle = 0.8;
+    int launcherServoMoveTime = 200;
 
     //gate servo
     double gateServoRestAngle = 0;
-    double gateServoLaunchAngle = 0.8;
-    int gateServoMoveTime = 350;
+    double gateServoLaunchAngle = 1;
+    int gateServoMoveTime = 325;
 
     //calibration data
     protected String calibrationFileName =  "LauncherConfig.json";
@@ -428,6 +430,7 @@ class LauncherSettings
     {.7,.7},
     {.9,.9}};
     int delayBetweenFrogLegs = 30;
+    int timeToOpenFrogLegs = 200;
 
     //other
     double startRPM = autoLaunchRPM;
