@@ -116,7 +116,9 @@ public class Launcher {
 
     void setFrogLegServos(Gamepad gamepad){
         if(launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
-            frogLegPos = 0;
+            if(frogLegPos != 0) frogLegPos = 0;
+            else frogLegPos = 2;
+
             if(lastfrogLegPos != frogLegPos) setFrogLegPos(false);
         }
         else if(launcherSettings.frogLegToggleButton.getButtonPressed(gamepad)) {

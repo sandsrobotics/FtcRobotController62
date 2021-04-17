@@ -13,7 +13,7 @@ public class Grabber {
     Robot robot;
     GrabberSettings grabberSettings;
 
-    protected int setEncoderPos;
+    private int setEncoderPos;
     //protected double[] setServoPositions = new double[2];
     //protected boolean clawClosed = true;
     protected boolean motorReset = false;
@@ -54,15 +54,13 @@ public class Grabber {
     void setFromControls(Gamepad gamepad)
     {
         //set encoder
-        if(grabberSettings.captureButton.getButtonPressed(gamepad)) setEncoderPos = grabberSettings.capturePos;
-        else if(grabberSettings.horizontalButton.getButtonPressed(gamepad)) setEncoderPos = grabberSettings.horizontalPos;
-        else if(grabberSettings.putOverButton.getButtonPressed(gamepad)) setEncoderPos = grabberSettings.putOverPos;
-        else if(grabberSettings.restPosButton.getButtonPressed(gamepad)) setEncoderPos = grabberSettings.restPos;
+        if(grabberSettings.captureButton.getButtonPressed(gamepad)) setEncoderSetPos(grabberSettings.capturePos);
+        else if(grabberSettings.horizontalButton.getButtonPressed(gamepad)) setEncoderSetPos(grabberSettings.horizontalPos);
+        else if(grabberSettings.putOverButton.getButtonPressed(gamepad)) setEncoderSetPos(grabberSettings.putOverPos);
+        else if(grabberSettings.restPosButton.getButtonPressed(gamepad)) setEncoderSetPos(grabberSettings.restPos);
 
-        if(Math.abs(grabberSettings.moveGrabberStick.getSliderValue(gamepad)) >= grabberSettings.stickTolerance) {
-            setEncoderPos += grabberSettings.moveGrabberStick.getSliderValue(gamepad) * grabberSettings.stickToTicksMultiplier;
-            if (setEncoderPos > grabberSettings.maxMotorPos) setEncoderPos = grabberSettings.maxMotorPos;
-            else if (setEncoderPos < grabberSettings.minMotorPos) setEncoderPos = grabberSettings.minMotorPos;
+        if(grabberSettings.moveGrabberStick.getButtonHeld(gamepad)) {
+            setEncoderSetPos(getEncoderSetPos() + (int)(grabberSettings.moveGrabberStick.getSliderValue(gamepad) * grabberSettings.stickToTicksMultiplier));
         }
 
         //set servo
@@ -106,7 +104,7 @@ public class Grabber {
 
     void moveMotors()
     {
-        robot.robotHardware.grabberLifterMotor.setTargetPosition(setEncoderPos);
+        robot.robotHardware.grabberLifterMotor.setTargetPosition(getEncoderSetPos());
         stopMotor();
     }
 /*
@@ -147,14 +145,25 @@ public class Grabber {
 
     void setGrabberToPos(int pos, boolean waitForMotor)
     {
-        setEncoderPos = pos;
+        setEncoderSetPos(pos);
         moveMotors();
         while(robot.robotHardware.grabberLifterMotor.isBusy() && !robot.stop() && waitForMotor) { if(stopMotor()) break; }
     }
 
+    void setEncoderSetPos(int pos){
+        setEncoderPos = pos;
+        if (setEncoderPos > grabberSettings.maxMotorPos) setEncoderPos = grabberSettings.maxMotorPos;
+        else if (setEncoderPos < grabberSettings.minMotorPos) setEncoderPos = grabberSettings.minMotorPos;
+        if(robot.launcher != null && robot.launcher.frogLegPos == 0 && setEncoderPos < grabberSettings.straitUpPos) setEncoderPos = grabberSettings.straitUpPos;
+    }
+
+    int getEncoderSetPos(){
+        return setEncoderPos;
+    }
+
     boolean stopMotor()
     {
-        if(!robot.robotHardware.grabberArmLimitSwitch.getState() && setEncoderPos <= 5)
+        if(!robot.robotHardware.grabberArmLimitSwitch.getState() && getEncoderSetPos() <= 5)
         {
             if(!motorReset)
             {
@@ -232,12 +241,12 @@ class GrabberSettings
     //user defined//
     ////////////////
     protected int maxMotorPos = 1600;
-    protected int minMotorPos = 0;
+    protected int minMotorPos = -50;
     protected double motorPower = .75;
 
     //preset lifter functions
     protected int capturePos = 1375; //position of grabber arm when grabbing a wobble goal
-    protected int horizontalPos = 0; //position of grabber arm when in storage
+    protected int horizontalPos = -50; //position of grabber arm when in storage
     protected int putOverPos = 1000; //position of grabber arm to put the wobble goal over the wall
     protected int restPos = 1500; //position of grabber arm when at rest on the side of robot
     protected int straitUpPos = 500; //position of grabber arm when strait up from the robot
@@ -253,7 +262,6 @@ class GrabberSettings
 
     //controls
     protected GamepadButtonManager moveGrabberStick = new GamepadButtonManager(null);//manual adjust of grabber
-    protected double stickTolerance = .03;
     protected double stickToTicksMultiplier = 20;
     protected GamepadButtonManager grabButton = new GamepadButtonManager(GamepadButtons.leftBUMPER);//open and close the grabber claws
     //preset positions
