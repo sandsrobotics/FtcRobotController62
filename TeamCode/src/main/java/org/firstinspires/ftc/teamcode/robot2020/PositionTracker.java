@@ -38,17 +38,17 @@ public class PositionTracker extends Thread
     volatile AngularVelocity currentAngularVelocity = new AngularVelocity();
 
     //encoders
-    protected Position encoderPosition = new Position();
+    public volatile Position encoderPosition = new Position();
 
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
-    protected Position distSensorPosition = new Position();
+    public volatile Position distSensorPosition = new Position();
 
     //camera
     static T265Camera slamra = null;
     private Position cameraOffset = new Position();
-    protected Position cameraPosition = new Position();
+    public volatile Position cameraPosition = new Position();
 
     //other
     String fileName = "angleData";
@@ -184,26 +184,6 @@ public class PositionTracker extends Thread
         }
     }
 
-    private void getPosFromDistSensors(){
-        inMeasuringRange = isRobotInRotationRange();
-
-        if(inMeasuringRange > -2) {
-            updateDistanceSensor(1);
-        }
-
-        updateRot();
-
-        if(inMeasuringRange > -2)
-        {
-            updateDistanceSensor(2);
-        }
-
-        if(inMeasuringRange > -2)
-        {
-            updatePosWithDistanceSensor(false);
-        }
-    }
-
     //////////
     //camera//
     //////////
@@ -280,6 +260,31 @@ public class PositionTracker extends Thread
         currentPosition.R = currentAllAxisRotations.thirdAngle;
     }
 
+    void updateAllPos(){
+        updateRot();
+        if(robot.robotUsage.positionUsage.useDistanceSensors) {
+            inMeasuringRange = isRobotInRotationRange();
+
+            if (inMeasuringRange > -2) {
+                updateDistanceSensor(1);
+            }
+        }
+
+        if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
+
+        if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
+        {
+            updateDistanceSensor(2);
+        }
+
+        if(robot.robotUsage.positionUsage.usePositionCamera) getPosFromCam();
+
+        if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
+        {
+            updatePosWithDistanceSensor(false);
+        }
+    }
+
     @Override
     public void run()
     {
@@ -289,20 +294,8 @@ public class PositionTracker extends Thread
         isInitialized = true;
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
-
-            if(robot.robotUsage.positionUsage.useDistanceSensors) getPosFromDistSensors();
-            else updateRot();
-            if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
-            if(robot.robotUsage.positionUsage.usePositionCamera) getPosFromCam();
-
-            if(drawDashboardField){
-                drawPosition(distSensorPosition, Color.RED);
-                drawPosition(encoderPosition, Color.BLUE);
-                drawPosition(cameraPosition, Color.GREEN);
-            }
+            updateAllPos();
         }
-
-
 
         if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
 
@@ -328,6 +321,12 @@ public class PositionTracker extends Thread
         double x1 = translation.getX() + arrowX  / 2, y1 = translation.getY() + arrowY / 2;
         double x2 = translation.getX() + arrowX, y2 = translation.getY() + arrowY;
         field.strokeLine(x1, y1, x2, y2);
+    }
+
+    public void drawAllPositions(){
+        drawPosition(distSensorPosition, Color.RED);
+        drawPosition(encoderPosition, Color.BLUE);
+        drawPosition(cameraPosition, Color.GREEN);
     }
 
     ///////////////////

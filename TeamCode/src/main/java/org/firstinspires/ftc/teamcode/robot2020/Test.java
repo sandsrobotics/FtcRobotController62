@@ -34,6 +34,7 @@ public class Test extends LinearOpMode {
         {
             robot.startTelemetry();
             robot.movement.moveForTeleOp(gamepad1, brake, false);
+            if(robot.positionTracker.drawDashboardField) robot.positionTracker.drawAllPositions();
             robot.sendTelemetry();
         }
     }
