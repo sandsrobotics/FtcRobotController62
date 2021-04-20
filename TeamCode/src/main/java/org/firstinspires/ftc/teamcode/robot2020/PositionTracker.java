@@ -261,7 +261,9 @@ public class PositionTracker extends Thread
     }
 
     void updateAllPos(){
+
         updateRot();
+
         if(robot.robotUsage.positionUsage.useDistanceSensors) {
             inMeasuringRange = isRobotInRotationRange();
 
@@ -311,6 +313,8 @@ public class PositionTracker extends Thread
     public void drawPosition(Position pos, Integer color){
         Canvas field = robot.packet.fieldOverlay();
         double robotRadius = 3;
+
+        pos = pos.switchXY();
 
         Translation2d translation = pos.toPose2d(false).getTranslation();
         Rotation2d rotation = pos.toPose2d(false).getRotation();
