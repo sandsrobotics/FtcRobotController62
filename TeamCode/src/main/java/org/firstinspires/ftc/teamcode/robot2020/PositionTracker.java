@@ -38,17 +38,17 @@ public class PositionTracker extends Thread
     volatile AngularVelocity currentAngularVelocity = new AngularVelocity();
 
     //encoders
-    protected Position encoderPosition;
+    protected Position encoderPosition = new Position();
 
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
-    protected Position distSensorPosition;
+    protected Position distSensorPosition = new Position();
 
     //camera
     static T265Camera slamra = null;
     private Position cameraOffset = new Position();
-    protected Position cameraPosition;
+    protected Position cameraPosition = new Position();
 
     //other
     String fileName = "angleData";
