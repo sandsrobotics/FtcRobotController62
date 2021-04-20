@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 // test
 @Config
-@TeleOp(name = "test position tracking")
+@TeleOp(name = "test all position trackers")
 public class Test extends LinearOpMode {
 
     Robot robot;
@@ -20,6 +20,8 @@ public class Test extends LinearOpMode {
         ru.positionUsage.usePositionThread = true;
         ru.positionUsage.usePosition = true;
         ru.positionUsage.useDistanceSensors = true;
+        ru.positionUsage.useEncoders = true;
+        ru.positionUsage.usePositionCamera = true;
         ru.useDrive = true;
 
         robot = new Robot(this, ru);
@@ -30,11 +32,9 @@ public class Test extends LinearOpMode {
 
         while (opModeIsActive())
         {
-           robot.movement.moveForTeleOp(gamepad1, brake, false);
-           robot.addTelemetry("X", robot.positionTracker.currentPosition.X);
-           robot.addTelemetry("Y", robot.positionTracker.currentPosition.Y);
-           robot.addTelemetry("R", robot.positionTracker.currentPosition.R);
-           robot.sendTelemetry();
+            robot.startTelemetry();
+            robot.movement.moveForTeleOp(gamepad1, brake, false);
+            robot.sendTelemetry();
         }
     }
 }

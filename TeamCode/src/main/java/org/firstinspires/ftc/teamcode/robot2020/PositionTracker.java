@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Pose2d;
@@ -35,13 +37,18 @@ public class PositionTracker extends Thread
     //angular velocity
     volatile AngularVelocity currentAngularVelocity = new AngularVelocity();
 
+    //encoders
+    protected Position encoderPosition;
+
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
+    protected Position distSensorPosition;
 
     //camera
     static T265Camera slamra = null;
     private Position cameraOffset = new Position();
+    protected Position cameraPosition;
 
     //other
     String fileName = "angleData";
@@ -100,8 +107,9 @@ public class PositionTracker extends Thread
         double XMove = (.25 * (-diff[0] + diff[2] + diff[1] - diff[3]))/positionSettings.ticksPerInchSideways;
 
         //rotate and add to robot positionTracker
-        currentPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
-        currentPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
+        encoderPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
+        encoderPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
+        encoderPosition.R = currentPosition.R;
     }
 
     ///////////////////
@@ -155,8 +163,9 @@ public class PositionTracker extends Thread
 
              */
 
-            currentPosition.X = calcDis[0];
-            currentPosition.Y = calcDis[1];
+            distSensorPosition.X = calcDis[0];
+            distSensorPosition.Y = calcDis[1];
+            distSensorPosition.R = currentPosition.R;
         }
     }
 
@@ -172,6 +181,26 @@ public class PositionTracker extends Thread
         int timeTillNextRead = positionSettings.minDelayBetweenSensorReadings - (int)(System.currentTimeMillis() - lastSensorReadingTime);
         if(timeTillNextRead > 0) {
             robot.sleep(timeTillNextRead);
+        }
+    }
+
+    private void getPosFromDistSensors(){
+        inMeasuringRange = isRobotInRotationRange();
+
+        if(inMeasuringRange > -2) {
+            updateDistanceSensor(1);
+        }
+
+        updateRot();
+
+        if(inMeasuringRange > -2)
+        {
+            updateDistanceSensor(2);
+        }
+
+        if(inMeasuringRange > -2)
+        {
+            updatePosWithDistanceSensor(false);
         }
     }
 
@@ -198,15 +227,15 @@ public class PositionTracker extends Thread
         return new Position(
             -camera.pose.getTranslation().getY() / Constants.mPerInch,
             camera.pose.getTranslation().getX() / Constants.mPerInch,
-            camera.pose.getRotation().getDegrees()
+            -camera.pose.getRotation().getDegrees()
         );
     }
 
-    void updatePosFromCam()
+    void getPosFromCam()
     {
         Position pos = getPositionFromCam();
         pos.add(cameraOffset);
-        currentPosition = pos;
+        cameraPosition = pos;
     }
 
     void endCam() {slamra.stop();}
@@ -260,45 +289,20 @@ public class PositionTracker extends Thread
         isInitialized = true;
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
-            if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
-            if(robot.robotUsage.positionUsage.usePositionCamera) updatePosFromCam();
-            if(robot.robotUsage.positionUsage.useDistanceSensors)
-            {
-                inMeasuringRange = isRobotInRotationRange();
 
-                if(inMeasuringRange > -2) {
-                    updateDistanceSensor(1);
-                }
-
-                updateRot();
-
-                if(inMeasuringRange > -2)
-                {
-                    updateDistanceSensor(2);
-                }
-
-                if(inMeasuringRange > -2)
-                {
-                    updatePosWithDistanceSensor(false);
-                }
-
-            }
+            if(robot.robotUsage.positionUsage.useDistanceSensors) getPosFromDistSensors();
             else updateRot();
+            if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
+            if(robot.robotUsage.positionUsage.usePositionCamera) getPosFromCam();
 
             if(drawDashboardField){
-                Canvas field = robot.packet.fieldOverlay();
-                double robotRadius = 3;
-
-                Translation2d translation = currentPosition.toPose2d(false).getTranslation();
-                Rotation2d rotation = currentPosition.toPose2d(false).getRotation();
-
-                field.strokeCircle(translation.getX(), translation.getY(), robotRadius);
-                double arrowX = rotation.getCos() * robotRadius, arrowY = rotation.getSin() * robotRadius;
-                double x1 = translation.getX() + arrowX  / 2, y1 = translation.getY() + arrowY / 2;
-                double x2 = translation.getX() + arrowX, y2 = translation.getY() + arrowY;
-                field.strokeLine(x1, y1, x2, y2);
+                drawPosition(distSensorPosition, Color.RED);
+                drawPosition(encoderPosition, Color.BLUE);
+                drawPosition(cameraPosition, Color.GREEN);
             }
         }
+
+
 
         if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
 
@@ -311,6 +315,24 @@ public class PositionTracker extends Thread
         }
     }
 
+    public void drawPosition(Position pos, Integer color){
+        Canvas field = robot.packet.fieldOverlay();
+        double robotRadius = 3;
+
+        Translation2d translation = pos.toPose2d(false).getTranslation();
+        Rotation2d rotation = pos.toPose2d(false).getRotation();
+
+        field.setStroke(color.toString());
+        field.strokeCircle(translation.getX(), translation.getY(), robotRadius);
+        double arrowX = rotation.getCos() * robotRadius, arrowY = rotation.getSin() * robotRadius;
+        double x1 = translation.getX() + arrowX  / 2, y1 = translation.getY() + arrowY / 2;
+        double x2 = translation.getX() + arrowX, y2 = translation.getY() + arrowY;
+        field.strokeLine(x1, y1, x2, y2);
+    }
+
+    ///////////////////
+    //pos with offset//
+    ///////////////////
     double[] getPositionWithOffsetArray(double X, double Y, double R) {
         return new double[]{currentPosition.X + X, currentPosition.Y + Y, currentPosition.R + R};
     }
@@ -323,6 +345,8 @@ public class PositionTracker extends Thread
     Position getPositionWithOffset(Position offset){
         return new Position(currentPosition.X + offset.X, currentPosition.Y + offset.Y, currentPosition.R + offset.R);
     }
+
+
 
     ///////////////
     //stop thread//

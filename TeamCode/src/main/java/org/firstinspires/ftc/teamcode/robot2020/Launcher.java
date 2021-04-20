@@ -22,6 +22,7 @@ public class Launcher {
     //other
     boolean shutdownWheel = true;
     boolean gateOpen = false;
+    boolean runWheelForward = false;
     float intakeMotorPower = 0;
     int frogLegPos = 0; //0 = rest, 1 = ready, 2 = down
     int lastfrogLegPos = 0;
@@ -102,14 +103,15 @@ public class Launcher {
 
     void setLauncherIntakeMotor(Gamepad gamepad)
     {
-        if(launcherSettings.intakeInButton.getButtonPressed(gamepad)){
-            if(intakeMotorPower == 1) intakeMotorPower = 0;
-            else intakeMotorPower = 1;
-        }
+        intakeMotorPower = 0;
+
+        if(launcherSettings.intakeInButton.getButtonPressed(gamepad)) runWheelForward = !runWheelForward;
+
         else if(launcherSettings.intakeOutSlider.getButtonHeld(gamepad)){
+            runWheelForward = false;
             intakeMotorPower = -launcherSettings.intakeOutSlider.getSliderValue(gamepad);
         }
-        else if(launcherSettings.intakeOutSlider.getButtonReleased(gamepad)) intakeMotorPower = 0;
+        else if(runWheelForward) intakeMotorPower = 1;
 
         robot.robotHardware.launcherIntakeMotor.setPower(intakeMotorPower);
     }
