@@ -245,10 +245,10 @@ public class PositionTracker extends Thread
             Position filePos = getPositionFromFile();
             if(filePos != null) positionSettings.startPos = filePos;
         }
-        currentPosition = positionSettings.startPos;
-        distSensorPosition = positionSettings.startPos;
-        cameraPosition = positionSettings.startPos;
-        encoderPosition = positionSettings.startPos;
+        currentPosition = positionSettings.startPos.clone();
+        distSensorPosition = positionSettings.startPos.clone();
+        cameraPosition = positionSettings.startPos.clone();
+        encoderPosition = positionSettings.startPos.clone();
     }
 
     void initializeEncoderTracking()
@@ -459,6 +459,8 @@ class Position
     Position toDeg(){return new Position(X, Y, Math.toDegrees(R));}
 
     public String toString(){return "X: " + X + ", Y: " + Y + ", R: " + R;}
+
+    public Position clone(){return new Position(X, Y, R);}
 
     void add(Position pos2){
         X += pos2.X;
