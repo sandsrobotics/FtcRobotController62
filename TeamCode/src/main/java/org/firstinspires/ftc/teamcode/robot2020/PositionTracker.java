@@ -246,6 +246,9 @@ public class PositionTracker extends Thread
             if(filePos != null) positionSettings.startPos = filePos;
         }
         currentPosition = positionSettings.startPos;
+        distSensorPosition = positionSettings.startPos;
+        cameraPosition = positionSettings.startPos;
+        encoderPosition = positionSettings.startPos;
     }
 
     void initializeEncoderTracking()
@@ -292,7 +295,7 @@ public class PositionTracker extends Thread
     {
         initializeCurrentPosition();
         if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
-        if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(currentPosition);
+        if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(cameraPosition);
         isInitialized = true;
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
@@ -310,16 +313,16 @@ public class PositionTracker extends Thread
         }
     }
 
-    public void drawPosition(Position pos, Integer color){
+    public void drawPosition(Position pos, String color){
         Canvas field = robot.packet.fieldOverlay();
-        double robotRadius = 3;
+        double robotRadius = 9;
 
         pos = pos.switchXY();
 
         Translation2d translation = pos.toPose2d(false).getTranslation();
         Rotation2d rotation = pos.toPose2d(false).getRotation();
 
-        field.setStroke(color.toString());
+        field.setStroke(color);
         field.strokeCircle(translation.getX(), translation.getY(), robotRadius);
         double arrowX = rotation.getCos() * robotRadius, arrowY = rotation.getSin() * robotRadius;
         double x1 = translation.getX() + arrowX  / 2, y1 = translation.getY() + arrowY / 2;
@@ -328,9 +331,9 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distSensorPosition, Color.RED);
-        drawPosition(encoderPosition, Color.BLUE);
-        drawPosition(cameraPosition, Color.GREEN);
+        drawPosition(distSensorPosition, "red");
+        drawPosition(encoderPosition, "blue");
+        drawPosition(cameraPosition, "green");
     }
 
     ///////////////////
