@@ -331,9 +331,9 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distSensorPosition, "red");
-        drawPosition(encoderPosition, "blue");
-        drawPosition(cameraPosition, "green");
+        drawPosition(distSensorPosition.toRad(), "red");
+        drawPosition(encoderPosition.toRad(), "blue");
+        drawPosition(cameraPosition.toRad(), "green");
     }
 
     ///////////////////
@@ -370,7 +370,7 @@ class PositionSettings
     //user variables//
     //////////////////
     //positionTracker start
-    short startPosMode = 2; //0 = set all to 0, 1 = use variable below, 2 = use file
+    short startPosMode = 1; //0 = set all to 0, 1 = use variable below, 2 = use file
     Position startPos = new Position(-20, -124, 0);
 
     //wheel ticks
@@ -453,6 +453,10 @@ class Position
     Position invertR(){
         return new Position(X, Y, -R);
     }
+
+    Position toRad(){return new Position(X, Y, Math.toRadians(R));}
+
+    Position toDeg(){return new Position(X, Y, Math.toDegrees(R));}
 
     void add(Position pos2){
         X += pos2.X;
