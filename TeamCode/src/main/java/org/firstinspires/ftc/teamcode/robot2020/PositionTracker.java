@@ -458,6 +458,8 @@ class Position
 
     Position toDeg(){return new Position(X, Y, Math.toDegrees(R));}
 
+    public String toString(){return "X: " + X + ", Y: " + Y + ", R: " + R;}
+
     void add(Position pos2){
         X += pos2.X;
         Y += pos2.Y;
