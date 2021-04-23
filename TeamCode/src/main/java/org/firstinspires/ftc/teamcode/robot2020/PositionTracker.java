@@ -404,7 +404,7 @@ class PositionSettings
 
     //camera
     double encoderMeasurementCovariance = 0.1;
-    Transform2d cameraToRobot = new Transform2d();
+    Transform2d cameraToRobot = new Transform2d(new Translation2d(-8.25 * Constants.mPerInch, 0), new Rotation2d());
 
     PositionSettings(){}
 }
