@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Pose2d;
@@ -40,7 +38,7 @@ public class PositionTracker extends Thread
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
-    public volatile Position distEncoderSensorPosition = new Position();
+    public volatile Position distEncoderPosition = new Position();
 
     //camera
     static T265Camera slamra = null;
@@ -104,9 +102,9 @@ public class PositionTracker extends Thread
         double XMove = (.25 * (-diff[0] + diff[2] + diff[1] - diff[3]))/positionSettings.ticksPerInchSideways;
 
         //rotate and add to robot positionTracker
-        distEncoderSensorPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
-        distEncoderSensorPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
-        distEncoderSensorPosition.R = currentPosition.R;
+        distEncoderPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
+        distEncoderPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
+        distEncoderPosition.R = currentPosition.R;
     }
 
     ///////////////////
@@ -160,9 +158,9 @@ public class PositionTracker extends Thread
 
              */
 
-            distEncoderSensorPosition.X = calcDis[0];
-            distEncoderSensorPosition.Y = calcDis[1];
-            distEncoderSensorPosition.R = currentPosition.R;
+            distEncoderPosition.X = calcDis[0];
+            distEncoderPosition.Y = calcDis[1];
+            distEncoderPosition.R = currentPosition.R;
         }
     }
 
@@ -243,7 +241,7 @@ public class PositionTracker extends Thread
             if(filePos != null) positionSettings.startPos = filePos;
         }
         currentPosition = positionSettings.startPos.clone();
-        distEncoderSensorPosition = positionSettings.startPos.clone();
+        distEncoderPosition = positionSettings.startPos.clone();
         cameraPosition = positionSettings.startPos.clone();
     }
 
@@ -261,6 +259,7 @@ public class PositionTracker extends Thread
 
     void updateAllPos(){
 
+        //get positions
         updateRot();
 
         if(robot.robotUsage.positionUsage.useDistanceSensors) {
@@ -283,6 +282,24 @@ public class PositionTracker extends Thread
         if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
         {
             updatePosWithDistanceSensor(false);
+        }
+
+        // average positions
+        int total = 0;
+        Position avg = new Position();
+
+        if(robot.robotUsage.positionUsage.useEncoders || robot.robotUsage.positionUsage.useDistanceSensors) {
+            total++;
+            avg.add(distEncoderPosition);
+        }
+        if(robot.robotUsage.positionUsage.usePositionCamera){
+            total++;
+            avg.add(cameraPosition);
+        }
+
+        if(total > 0){
+            avg.divide(total);
+            currentPosition = avg;
         }
     }
 
@@ -327,8 +344,9 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distEncoderSensorPosition.toRad(), "red");
+        drawPosition(distEncoderPosition.toRad(), "red");
         drawPosition(cameraPosition.toRad(), "green");
+        drawPosition(currentPosition.toRad(), "blue");
     }
 
     ///////////////////
@@ -469,6 +487,12 @@ class Position
         X -= pos2.X;
         Y -= pos2.Y;
         R -= pos2.R;
+    }
+
+    void divide(double divisor){
+        X /= divisor;
+        Y /= divisor;
+        R /= divisor;
     }
 
     Pose2d toPose2d(boolean convertToMeters){
