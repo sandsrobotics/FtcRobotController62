@@ -75,8 +75,6 @@ public class Autonomous extends LinearOpMode {
         ru.visionUsage.useTensorFlowInTread = false;
         ru.visionUsage.useOpenCV = false;
         ru.visionUsage.useVuforiaInThread = false;
-        
-        ru.positionUsage.useCamera = false;
 
         /////////
         //start//

@@ -11,9 +11,6 @@ public class AutonomousMovement extends LinearOpMode {
     //////////////////
     //user variables//
     //////////////////
-    //buttons
-    GamepadButtonManager closeButton = new GamepadButtonManager(GamepadButtons.A);
-
     //positions
     Position basePos = new Position(-20, -80, 0);
 
@@ -31,13 +28,13 @@ public class AutonomousMovement extends LinearOpMode {
     };
 
     Position[][] secondGoalPositions = {
-            {
-                    new Position(-10, - 106, 0),
-                    new Position(-2, -112, 0)
-            }, {
+        {
+            new Position(-10, - 106, 0),
+            new Position(-2, -112, 0)
+        }, {
             new Position(30, -100, 180),
             new Position(22, -107.5, 180)
-    }
+        }
     };
 
     Position parkPos = new Position(0,-53,-90);
