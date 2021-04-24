@@ -124,6 +124,7 @@ public class Movement
                         robot.sendTelemetry();
                     }
                     loops++;
+                    robot.positionTracker.drawAllPositions();
                 }
             }
             robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);
