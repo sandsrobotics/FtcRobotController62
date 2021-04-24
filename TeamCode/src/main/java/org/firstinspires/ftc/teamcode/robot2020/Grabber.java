@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -199,7 +198,7 @@ public class Grabber {
 
     void runGrabberIntake(){runGrabberIntake(grabberSettings.maxIntakeTime);}
 
-    void grabberOuttake(boolean useDelay, int delay){
+    void runGrabberOuttake(boolean useDelay, int delay){
         setIntakeMode((short) 2);
         moveServos();
         if(useDelay){
@@ -209,7 +208,8 @@ public class Grabber {
         }
     }
 
-    void grabberOuttake(boolean useDelay){grabberOuttake(useDelay, grabberSettings.outtakeTime);}
+    void runGrabberOuttake(boolean useDelay){
+        runGrabberOuttake(useDelay, grabberSettings.outtakeTime);}
 
 /*
     void setServosToPos(double[] servoPos, boolean waitForServos)

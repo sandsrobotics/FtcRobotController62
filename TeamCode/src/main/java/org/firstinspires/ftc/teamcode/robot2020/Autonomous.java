@@ -49,7 +49,6 @@ public class Autonomous extends LinearOpMode {
     //other variables//
     ///////////////////
     //grabber
-    boolean closed = true;
     int straitUpPos = 500;
 
     //tfod
