@@ -125,7 +125,7 @@ public class Autonomous extends LinearOpMode {
         robot.robotUsage.positionUsage.useDistanceSensors = false;
         goToDropZone(finalNumOfRings, 1);
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos, true);
-        robot.grabber.runGrabberIntake();
+        robot.grabber.runGrabberOuttake(true);
         robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(0,-7, 0), robot.movement.movementSettings.losePosSettings);
 
         //get ready and go to second goal
@@ -154,7 +154,7 @@ public class Autonomous extends LinearOpMode {
         }
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos - 70, false);
         goToDropZone(finalNumOfRings, 2);
-        robot.grabber.runGrabberIntake();
+        robot.grabber.runGrabberOuttake(false);
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.restPos, false);
 
         robot.robotUsage.positionUsage.useDistanceSensors = false;
