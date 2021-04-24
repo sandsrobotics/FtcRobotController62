@@ -35,10 +35,13 @@ public class PositionTracker extends Thread
     //angular velocity
     volatile AngularVelocity currentAngularVelocity = new AngularVelocity();
 
+    //encoder
+    public volatile Position encoderPosition = new Position();
+
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
-    public volatile Position distEncoderPosition = new Position();
+    public volatile Position distSensorPosition = new Position();
 
     //camera
     static T265Camera slamra = null;
@@ -102,9 +105,9 @@ public class PositionTracker extends Thread
         double XMove = (.25 * (-diff[0] + diff[2] + diff[1] - diff[3]))/positionSettings.ticksPerInchSideways;
 
         //rotate and add to robot positionTracker
-        distEncoderPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
-        distEncoderPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
-        distEncoderPosition.R = currentPosition.R;
+        encoderPosition.X = currentPosition.X + YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
+        encoderPosition.Y = currentPosition.Y +  XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
+        encoderPosition.R = currentPosition.R;
     }
 
     ///////////////////
@@ -158,9 +161,9 @@ public class PositionTracker extends Thread
 
              */
 
-            distEncoderPosition.X = calcDis[0];
-            distEncoderPosition.Y = calcDis[1];
-            distEncoderPosition.R = currentPosition.R;
+            distSensorPosition.X = calcDis[0];
+            distSensorPosition.Y = calcDis[1];
+            distSensorPosition.R = currentPosition.R;
         }
     }
 
@@ -241,7 +244,8 @@ public class PositionTracker extends Thread
             if(filePos != null) positionSettings.startPos = filePos;
         }
         currentPosition = positionSettings.startPos.clone();
-        distEncoderPosition = positionSettings.startPos.clone();
+        distSensorPosition = positionSettings.startPos.clone();
+        encoderPosition = positionSettings.startPos.clone();
         cameraPosition = positionSettings.startPos.clone();
     }
 
@@ -285,22 +289,23 @@ public class PositionTracker extends Thread
         }
 
         // average positions
-        int total = 0;
-        Position avg = new Position();
+        int total = 1;
+        Position avg = encoderPosition;
 
-        if(robot.robotUsage.positionUsage.useEncoders || robot.robotUsage.positionUsage.useDistanceSensors) {
+        Position diff = encoderPosition.getAbsDiff(distSensorPosition);
+        if(robot.robotUsage.positionUsage.useDistanceSensors && diff.X < positionSettings.maxEncoderVariance.X && diff.Y < positionSettings.maxEncoderVariance.Y && diff.R < positionSettings.maxEncoderVariance.R) {
             total++;
-            avg.add(distEncoderPosition);
+            avg.add(distSensorPosition);
         }
-        if(robot.robotUsage.positionUsage.useCamera){
+
+        diff = encoderPosition.getAbsDiff(cameraPosition);
+        if(robot.robotUsage.positionUsage.useCamera && diff.X < positionSettings.maxEncoderVariance.X && diff.Y < positionSettings.maxEncoderVariance.Y && diff.R < positionSettings.maxEncoderVariance.R){
             total++;
             avg.add(cameraPosition);
         }
 
-        if(total > 0){
-            avg.divide(total);
-            currentPosition = avg;
-        }
+        avg.divide(total);
+        currentPosition = avg;
     }
 
     @Override
@@ -344,8 +349,9 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distEncoderPosition.toRad(), "red");
+        drawPosition(distSensorPosition.toRad(), "red");
         drawPosition(cameraPosition.toRad(), "green");
+        drawPosition(encoderPosition.toRad(), "yellow");
         drawPosition(currentPosition.toRad(), "blue");
     }
 
@@ -418,6 +424,9 @@ class PositionSettings
     //camera
     double encoderMeasurementCovariance = 0.1;
     Transform2d cameraToRobot = new Transform2d(new Translation2d(-8.25 * Constants.mPerInch, 0), new Rotation2d());
+
+    //other
+    Position maxEncoderVariance = new Position(5,5,5);
 
     PositionSettings(){}
 }
@@ -493,6 +502,19 @@ class Position
         X /= divisor;
         Y /= divisor;
         R /= divisor;
+    }
+
+    void abs(){
+        X = Math.abs(X);
+        Y = Math.abs(Y);
+        R = Math.abs(R);
+    }
+
+    Position getAbsDiff(Position pos2){
+        Position diff = this.clone();
+        diff.subtract(pos2);
+        diff.abs();
+        return diff;
     }
 
     Pose2d toPose2d(boolean convertToMeters){
