@@ -71,6 +71,8 @@ public class AutonomousMovement extends LinearOpMode {
         ru.positionUsage.usePosition = true;
         ru.positionUsage.usePositionThread = true;
         ru.positionUsage.useDistanceSensors = true;
+        ru.positionUsage.useEncoders = true;
+        ru.positionUsage.useCamera = true;
 
         /////////
         //start//

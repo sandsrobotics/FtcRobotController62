@@ -21,7 +21,7 @@ public class Test extends LinearOpMode {
         ru.positionUsage.usePosition = true;
         ru.positionUsage.useDistanceSensors = true;
         ru.positionUsage.useEncoders = true;
-        ru.positionUsage.usePositionCamera = true;
+        ru.positionUsage.useCamera = true;
         ru.useDrive = true;
 
         robot = new Robot(this, ru);

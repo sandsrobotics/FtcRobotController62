@@ -57,13 +57,13 @@ public class PositionTracker extends Thread
     {
         positionSettings = new PositionSettings();
         this.robot = robot;
-        if(robot.robotUsage.positionUsage.usePositionCamera) initCam();
+        if(robot.robotUsage.positionUsage.useCamera) initCam();
     }
     PositionTracker(Robot robot, PositionSettings positionSettings)
     {
         this.positionSettings = positionSettings;
         this.robot = robot;
-        if(robot.robotUsage.positionUsage.usePositionCamera) initCam();
+        if(robot.robotUsage.positionUsage.useCamera) initCam();
     }
 
     //////////
@@ -277,7 +277,7 @@ public class PositionTracker extends Thread
             updateDistanceSensor(2);
         }
 
-        if(robot.robotUsage.positionUsage.usePositionCamera) getPosFromCam();
+        if(robot.robotUsage.positionUsage.useCamera) getPosFromCam();
 
         if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
         {
@@ -292,7 +292,7 @@ public class PositionTracker extends Thread
             total++;
             avg.add(distEncoderPosition);
         }
-        if(robot.robotUsage.positionUsage.usePositionCamera){
+        if(robot.robotUsage.positionUsage.useCamera){
             total++;
             avg.add(cameraPosition);
         }
@@ -308,14 +308,14 @@ public class PositionTracker extends Thread
     {
         initializeCurrentPosition();
         if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
-        if(robot.robotUsage.positionUsage.usePositionCamera) setCurrentCamPos(cameraPosition);
+        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(cameraPosition);
         isInitialized = true;
 
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
             updateAllPos();
         }
 
-        if(robot.robotUsage.positionUsage.usePositionCamera) endCam();
+        if(robot.robotUsage.positionUsage.useCamera) endCam();
 
         writePositionToFile();
     }

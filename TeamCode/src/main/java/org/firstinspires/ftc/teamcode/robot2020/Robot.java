@@ -254,7 +254,7 @@ class RobotUsage
 
 class PositionUsage
 {
-    boolean usePosition, useEncoders, useDistanceSensors, usePositionCamera, usePositionThread;
+    boolean usePosition, useEncoders, useDistanceSensors, useCamera, usePositionThread;
 
     PositionUsage()
     {
@@ -264,13 +264,13 @@ class PositionUsage
     {
         setAllToValue(value);
     }
-    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors, boolean usePositionCamera)
+    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors, boolean useCamera)
     {
         this.usePosition = usePosition;
         this.usePositionThread = usePositionThread;
         this.useEncoders = useEncoders;
         this.useDistanceSensors = useDistanceSensors;
-        this.usePositionCamera = usePositionCamera;
+        this.useCamera = useCamera;
     }
 
     void setAllToValue(boolean value)
@@ -279,11 +279,11 @@ class PositionUsage
         this.usePositionThread = value;
         this.useEncoders = value;
         this.useDistanceSensors = value;
-        this.usePositionCamera = value;
+        this.useCamera = value;
     }
 
     boolean useThread(){return usePosition && usePositionThread;}
-    boolean positionTrackingEnabled(){return usePosition && (useDistanceSensors || useEncoders || usePositionCamera);}
+    boolean positionTrackingEnabled(){return usePosition && (useDistanceSensors || useEncoders || useCamera);}
 }
 
 class VisionUsage
