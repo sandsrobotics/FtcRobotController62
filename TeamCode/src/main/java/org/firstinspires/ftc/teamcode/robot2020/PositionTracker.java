@@ -37,13 +37,10 @@ public class PositionTracker extends Thread
     //angular velocity
     volatile AngularVelocity currentAngularVelocity = new AngularVelocity();
 
-    //encoders
-    public volatile Position encoderPosition = new Position();
-
     //distance sensor positionTracker
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
-    public volatile Position distSensorPosition = new Position();
+    public volatile Position distEncoderSensorPosition = new Position();
 
     //camera
     static T265Camera slamra = null;
@@ -107,9 +104,9 @@ public class PositionTracker extends Thread
         double XMove = (.25 * (-diff[0] + diff[2] + diff[1] - diff[3]))/positionSettings.ticksPerInchSideways;
 
         //rotate and add to robot positionTracker
-        encoderPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
-        encoderPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
-        encoderPosition.R = currentPosition.R;
+        distEncoderSensorPosition.X += YMove * Math.sin(currentPosition.R * Math.PI / 180) - XMove * Math.cos(currentPosition.R * Math.PI / 180);
+        distEncoderSensorPosition.Y += XMove * Math.sin(currentPosition.R * Math.PI / 180) + YMove * Math.cos(currentPosition.R * Math.PI / 180);
+        distEncoderSensorPosition.R = currentPosition.R;
     }
 
     ///////////////////
@@ -163,9 +160,9 @@ public class PositionTracker extends Thread
 
              */
 
-            distSensorPosition.X = calcDis[0];
-            distSensorPosition.Y = calcDis[1];
-            distSensorPosition.R = currentPosition.R;
+            distEncoderSensorPosition.X = calcDis[0];
+            distEncoderSensorPosition.Y = calcDis[1];
+            distEncoderSensorPosition.R = currentPosition.R;
         }
     }
 
@@ -246,9 +243,8 @@ public class PositionTracker extends Thread
             if(filePos != null) positionSettings.startPos = filePos;
         }
         currentPosition = positionSettings.startPos.clone();
-        distSensorPosition = positionSettings.startPos.clone();
+        distEncoderSensorPosition = positionSettings.startPos.clone();
         cameraPosition = positionSettings.startPos.clone();
-        encoderPosition = positionSettings.startPos.clone();
     }
 
     void initializeEncoderTracking()
@@ -331,8 +327,7 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distSensorPosition.toRad(), "red");
-        drawPosition(encoderPosition.toRad(), "blue");
+        drawPosition(distEncoderSensorPosition.toRad(), "red");
         drawPosition(cameraPosition.toRad(), "green");
     }
 
