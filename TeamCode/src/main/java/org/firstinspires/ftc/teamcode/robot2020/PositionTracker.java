@@ -317,7 +317,7 @@ public class PositionTracker extends Thread
         Canvas field = robot.packet.fieldOverlay();
         double robotRadius = 9;
 
-        pos = pos.switchXY().invertX().invertR().toField();
+        pos = pos.switchXY().invertY().invertR().toField();
 
         Translation2d translation = pos.toPose2d(false).getTranslation();
         Rotation2d rotation = pos.toPose2d(false).getRotation();
@@ -458,7 +458,7 @@ class Position
 
     Position toDeg(){return new Position(X, Y, Math.toDegrees(R));}
 
-    Position toField(){return new Position(X - (2.5 * 24), Y - (1.5 * 24), R);}
+    Position toField(){return new Position(X + (2.5 * 24), Y + (1.5 * 24), R);}
 
     public String toString(){return "X: " + X + ", Y: " + Y + ", R: " + R;}
 
