@@ -87,9 +87,13 @@ public class Autonomous extends LinearOpMode {
 
         while(!isStarted() && !isStopRequested())
         {
-            if(closeButton.getButtonPressed(gamepad1))
-            {
-                robot.grabber.runGrabberIntake();
+            if(closeButton.getButtonPressed(gamepad1)) {
+                robot.grabber.setIntakeMode((short) 1);
+                robot.grabber.moveServos();
+            }
+            else if(closeButton.getButtonReleased(gamepad1)){
+                robot.grabber.setIntakeMode((short) 0);
+                robot.grabber.moveServos();
             }
 
             calculatedNumOfRings = getNumOfRings();
@@ -105,7 +109,7 @@ public class Autonomous extends LinearOpMode {
         if(isStopRequested()) return;
 
         robot.start(false, true);
-        robot.positionTracker.waitForPositionInitialization();
+        robot.positionTracker.waitForPositionInitialization(2000);
 
         ////////////////
         //main program//

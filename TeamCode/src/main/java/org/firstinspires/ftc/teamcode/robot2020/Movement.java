@@ -114,17 +114,18 @@ public class Movement
                     else numOfTimesInTolerance = 0;
 
                     robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(powers[0], powers[1], powers[2], false, true));
-
-                    if(robot.robotSettings.debug_methods) {
-                        robot.addTelemetry("x: ", robot.positionTracker.currentPosition.X);
-                        robot.addTelemetry("y: ", robot.positionTracker.currentPosition.Y);
-                        robot.addTelemetry("rot: ", robot.positionTracker.currentPosition.R);
-                        robot.addTelemetry("error mag: ", errorVectorMag);
-                        robot.addTelemetry("error rot: ", errorVectorRot);
+                    if(robot.robotSettings.debug_methods || robot.positionTracker.drawDashboardField){
+                        if(robot.robotSettings.debug_methods) {
+                            robot.addTelemetry("x: ", robot.positionTracker.currentPosition.X);
+                            robot.addTelemetry("y: ", robot.positionTracker.currentPosition.Y);
+                            robot.addTelemetry("rot: ", robot.positionTracker.currentPosition.R);
+                            robot.addTelemetry("error mag: ", errorVectorMag);
+                            robot.addTelemetry("error rot: ", errorVectorRot);
+                        }
+                        robot.positionTracker.drawAllPositions();
                         robot.sendTelemetry();
                     }
                     loops++;
-                    robot.positionTracker.drawAllPositions();
                 }
             }
             robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);

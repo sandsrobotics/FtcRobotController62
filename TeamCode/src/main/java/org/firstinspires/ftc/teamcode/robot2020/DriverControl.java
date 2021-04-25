@@ -51,63 +51,43 @@ public class DriverControl extends LinearOpMode
 
         while (opModeIsActive())
         {
-            if(mode == 0)
-            {
-                robot.movement.moveForTeleOp(gamepad1, true);
-                robot.grabber.runForTeleOp(gamepad1, true);
-                robot.launcher.runForTeleOp(gamepad2,true);
+            robot.sendTelemetry();
 
-                if(fullAutoLaunchButton.getButtonHeld()) mode = 1;
-                else if(semiAutoLaunchButton.getButtonHeld()) mode = 2;
-                else if(pointToZero.getButtonHeld()) mode = 3;
-                else if(wobbleGaolDrop.getButtonHeld()) mode = 4;
-                else if(autoLaunchPowerShot.getButtonHeld()) mode = 5;
-                else if(autoLaunchPowerShot2.getButtonHeld()) mode = 6;
+            robot.movement.moveForTeleOp(gamepad1, true);
+            robot.grabber.runForTeleOp(gamepad1, true);
+            robot.launcher.runForTeleOp(gamepad2,true);
+            robot.positionTracker.drawAllPositions();
 
-                if(RPMChange.getButtonPressed())
-                {
-                  if(robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM){robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;}
-                  else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
-                }
-                if(resetAngle.getButtonPressed()) robot.positionTracker.resetAngle();
-                if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
-                else robot.movement.setSpeedMultiplier(1);
-
-                float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
-                robot.addTelemetry("dist 1", dist[0]);
-                robot.addTelemetry("dist 2", dist[1]);
-
-                robot.sendTelemetry();
-            }
-            else if(mode == 1) {
+            if(fullAutoLaunchButton.getButtonHeld())
                 robot.launcher.autoLaunchDiskFromLine();
-                mode = 0;
-            }
-            else if(mode == 2){
+            else if(semiAutoLaunchButton.getButtonHeld()) {
                 robot.launcher.setRPM(robot.launcher.launcherSettings.autoLaunchRPM);
                 robot.launcher.goToLine();
                 robot.launcher.shutdownWheel = false;
-                mode = 0;
             }
-            else if(mode == 3){
+            else if(pointToZero.getButtonHeld())
                 robot.movement.turnToAngle(0 , robot.movement.movementSettings.finalPosSettings.toRotAngleSettings());
-                mode = 0;
-            }
-            else if(mode == 4)
-            {
+            else if(wobbleGaolDrop.getButtonHeld())
                 robot.grabber.autoDrop();
-                mode = 0;
-            }
-            else if(mode == 5)
-            {
+            else if(autoLaunchPowerShot.getButtonHeld())
                 robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos);
-                mode = 0;
-            }
-            else if(mode == 6)
-            {
+            else if(autoLaunchPowerShot2.getButtonHeld())
                 robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPosV2);
-                mode = 0;
+
+            if(RPMChange.getButtonPressed())
+            {
+              if(robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM){robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;}
+              else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
             }
+            if(resetAngle.getButtonPressed()) robot.positionTracker.resetAngle();
+            if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
+            else robot.movement.setSpeedMultiplier(1);
+
+            float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
+            robot.addTelemetry("dist 1", dist[0]);
+            robot.addTelemetry("dist 2", dist[1]);
+
+            robot.sendTelemetry();
         }
     }
 }

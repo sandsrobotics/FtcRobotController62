@@ -163,7 +163,6 @@ public class PositionTracker extends Thread
 
             distSensorPosition.X = calcDis[0];
             distSensorPosition.Y = calcDis[1];
-            distSensorPosition.R = currentPosition.R;
         }
     }
 
@@ -236,17 +235,27 @@ public class PositionTracker extends Thread
     //////////////////
     //runs in thread//
     //////////////////
-    void initializeCurrentPosition()
+    void setCurrentPosition(Position pos){
+        currentPosition = pos.clone();
+        distSensorPosition = pos.clone();
+        encoderPosition = pos.clone();
+        cameraPosition = pos.clone();
+        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(cameraPosition);
+    }
+
+    void setCurrentPositionNoRot(Position pos){
+        pos.R = currentPosition.R;
+        setCurrentPosition(pos);
+    }
+
+    Position getStartPos()
     {
         if(positionSettings.startPosMode != 1) positionSettings.startPos = new Position();
         if(positionSettings.startPosMode == 2) {
             Position filePos = getPositionFromFile();
             if(filePos != null) positionSettings.startPos = filePos;
         }
-        currentPosition = positionSettings.startPos.clone();
-        distSensorPosition = positionSettings.startPos.clone();
-        encoderPosition = positionSettings.startPos.clone();
-        cameraPosition = positionSettings.startPos.clone();
+        return positionSettings.startPos;
     }
 
     void initializeEncoderTracking()
@@ -289,33 +298,28 @@ public class PositionTracker extends Thread
         }
 
         // average positions
-        int total = 1;
-        Position avg = encoderPosition;
-
-        Position diff = encoderPosition.getAbsDiff(distSensorPosition);
-        if(robot.robotUsage.positionUsage.useDistanceSensors && diff.X < positionSettings.maxEncoderVariance.X && diff.Y < positionSettings.maxEncoderVariance.Y && diff.R < positionSettings.maxEncoderVariance.R) {
-            total++;
-            avg.add(distSensorPosition);
+        if(distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+            setCurrentPositionNoRot(distSensorPosition);
+        else if(distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+            setCurrentPositionNoRot(distSensorPosition);
+        else if(cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
+            currentPosition.X = cameraPosition.X;
+            currentPosition.Y = cameraPosition.Y;
         }
+        else
+            currentPosition = encoderPosition;
+    }
 
-        diff = encoderPosition.getAbsDiff(cameraPosition);
-        if(robot.robotUsage.positionUsage.useCamera && diff.X < positionSettings.maxEncoderVariance.X && diff.Y < positionSettings.maxEncoderVariance.Y && diff.R < positionSettings.maxEncoderVariance.R){
-            total++;
-            avg.add(cameraPosition);
-        }
-
-        avg.divide(total);
-        currentPosition = avg;
+    void initAll(){
+        setCurrentPosition(getStartPos());
+        if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
+        isInitialized = true;
     }
 
     @Override
     public void run()
     {
-        initializeCurrentPosition();
-        if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
-        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(cameraPosition);
-        isInitialized = true;
-
+        initAll();
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
             updateAllPos();
         }
@@ -325,9 +329,11 @@ public class PositionTracker extends Thread
         writePositionToFile();
     }
 
-    void waitForPositionInitialization(){
+    void waitForPositionInitialization(int maxTime){
+        long start = System.currentTimeMillis();
+
         while(!isInitialized){
-            robot.delay(1);
+            if(System.currentTimeMillis() - start > maxTime) return;
         }
     }
 
@@ -349,10 +355,12 @@ public class PositionTracker extends Thread
     }
 
     public void drawAllPositions(){
-        drawPosition(distSensorPosition.toRad(), "red");
-        drawPosition(cameraPosition.toRad(), "green");
-        drawPosition(encoderPosition.toRad(), "yellow");
-        drawPosition(currentPosition.toRad(), "blue");
+        if(drawDashboardField) {
+            drawPosition(distSensorPosition.toRad(), "red");
+            drawPosition(cameraPosition.toRad(), "green");
+            drawPosition(encoderPosition.toRad(), "yellow");
+            drawPosition(currentPosition.toRad(), "blue");
+        }
     }
 
     ///////////////////
@@ -426,7 +434,7 @@ class PositionSettings
     Transform2d cameraToRobot = new Transform2d(new Translation2d(-8.25 * Constants.mPerInch, 0), new Rotation2d());
 
     //other
-    Position maxEncoderVariance = new Position(5,5,5);
+    Position maxDistanceDeviation = new Position(7.5,7.5,50);
 
     PositionSettings(){}
 }
@@ -482,7 +490,10 @@ class Position
 
     Position toField(){return new Position(X + (2.5 * 24), Y + (1.5 * 24), R);}
 
-    public String toString(){return "X: " + X + ", Y: " + Y + ", R: " + R;}
+    public String toString(int decimals){
+        Position pos = round(decimals);
+        return "X: " + pos.X + ", Y: " + pos.Y + ", R: " + pos.R;
+    }
 
     public Position clone(){return new Position(X, Y, R);}
 
@@ -510,11 +521,24 @@ class Position
         R = Math.abs(R);
     }
 
+    Position round(int decimals){
+        return new Position(
+        Math.round(X * Math.pow(10, decimals))/ Math.pow(10, decimals),
+        Math.round(Y * Math.pow(10, decimals))/ Math.pow(10, decimals),
+        Math.round(R * Math.pow(10, decimals))/ Math.pow(10, decimals)
+        );
+    }
+
     Position getAbsDiff(Position pos2){
         Position diff = this.clone();
         diff.subtract(pos2);
         diff.abs();
         return diff;
+    }
+
+    boolean isPositionInRange(Position pos2, Position maxDiff){
+        Position diff = getAbsDiff(pos2);
+        return diff.X < maxDiff.X && diff.Y < maxDiff.Y && diff.R < maxDiff.R;
     }
 
     Pose2d toPose2d(boolean convertToMeters){

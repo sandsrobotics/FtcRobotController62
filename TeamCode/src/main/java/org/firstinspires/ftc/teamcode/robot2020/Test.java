@@ -34,11 +34,11 @@ public class Test extends LinearOpMode {
         {
             robot.startTelemetry();
             robot.movement.moveForTeleOp(gamepad1, brake, false);
-            if(robot.positionTracker.drawDashboardField) robot.positionTracker.drawAllPositions();
-            robot.addTelemetry("dist", robot.positionTracker.distSensorPosition.toString());
-            robot.addTelemetry("enc", robot.positionTracker.encoderPosition.toString());
-            robot.addTelemetry("cam", robot.positionTracker.cameraPosition.toString());
-            robot.addTelemetry("main pos", robot.positionTracker.currentPosition.toString());
+            robot.positionTracker.drawAllPositions();
+            robot.addTelemetry("dist", robot.positionTracker.distSensorPosition.toString(2));
+            robot.addTelemetry("enc", robot.positionTracker.encoderPosition.toString(2));
+            robot.addTelemetry("cam", robot.positionTracker.cameraPosition.toString(2));
+            robot.addTelemetry("main pos", robot.positionTracker.currentPosition.toString(2));
             robot.sendTelemetry();
         }
     }
