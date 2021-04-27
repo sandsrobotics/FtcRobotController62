@@ -281,7 +281,9 @@ public class PositionTracker extends Thread
             if (inMeasuringRange > -2) {
                 updateDistanceSensor(1);
             }
+            else robot.sleep(positionSettings.imuDelay);
         }
+        else robot.sleep(positionSettings.imuDelay);
 
         if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
 
@@ -435,6 +437,7 @@ class PositionSettings
 
     //other
     Position maxDistanceDeviation = new Position(7.5,7.5,50);
+    int imuDelay = 50;
 
     PositionSettings(){}
 }
