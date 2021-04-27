@@ -298,9 +298,9 @@ public class PositionTracker extends Thread
         }
 
         // average positions
-        if(distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+        if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
             setCurrentPositionNoRot(distSensorPosition);
-        else if(distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+        else if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
             setCurrentPositionNoRot(distSensorPosition);
         else if(cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
