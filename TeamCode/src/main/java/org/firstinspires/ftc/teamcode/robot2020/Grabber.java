@@ -174,6 +174,10 @@ public class Grabber {
             if(robot.robotHardware.grabberLifterMotor.getPower() != 0) robot.robotHardware.grabberLifterMotor.setPower(0);
             return true;
         }
+        else if(getEncoderSetPos() == grabberSettings.maxMotorPos && robot.robotHardware.grabberLifterMotor.getCurrentPosition() > grabberSettings.straitUpPos + 100){
+            robot.robotHardware.grabberLifterMotor.setPower(0);
+            return true;
+        }
         else {
             if (robot.robotHardware.grabberLifterMotor.getPower() != grabberSettings.motorPower) robot.robotHardware.grabberLifterMotor.setPower(grabberSettings.motorPower);
             motorReset = false;
