@@ -214,7 +214,6 @@ public class PositionTracker extends Thread
         Position pos = getPositionFromCam();
         pos.add(cameraOffset);
         cameraPosition = pos;
-        cameraPosition.R = currentPosition.R;
     }
 
     void endCam() {slamra.stop();}
@@ -497,7 +496,7 @@ class Position
         return "X: " + pos.X + ", Y: " + pos.Y + ", R: " + pos.R;
     }
 
-    public Position clone(){return new Position(X, Y, R);}
+    public Position clone(){ return new Position(X, Y, R);}
 
     void add(Position pos2){
         X += pos2.X;
