@@ -163,6 +163,7 @@ public class PositionTracker extends Thread
 
             distSensorPosition.X = calcDis[0];
             distSensorPosition.Y = calcDis[1];
+            distSensorPosition.R = currentPosition.R;
         }
     }
 
@@ -195,7 +196,7 @@ public class PositionTracker extends Thread
         Position curPos = getPositionFromCam();
         cameraOffset.X = -curPos.X + pos.X;
         cameraOffset.Y = -curPos.Y + pos.Y;
-        cameraOffset.R = -curPos.R + pos.R;
+        //cameraOffset.R = -curPos.R + pos.R;
     }
 
     private Position getPositionFromCam(){
@@ -213,6 +214,7 @@ public class PositionTracker extends Thread
         Position pos = getPositionFromCam();
         pos.add(cameraOffset);
         cameraPosition = pos;
+        cameraPosition.R = currentPosition.R;
     }
 
     void endCam() {slamra.stop();}
@@ -236,11 +238,8 @@ public class PositionTracker extends Thread
     //runs in thread//
     //////////////////
     void setCurrentPosition(Position pos){
-        currentPosition = pos.clone();
-        distSensorPosition = pos.clone();
-        encoderPosition = pos.clone();
-        cameraPosition = pos.clone();
-        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(cameraPosition);
+        currentPosition = pos;
+        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(currentPosition);
     }
 
     void setCurrentPositionNoRot(Position pos){
@@ -301,9 +300,9 @@ public class PositionTracker extends Thread
 
         // average positions
         if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPositionNoRot(distSensorPosition);
+            setCurrentPosition(distSensorPosition);
         else if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPositionNoRot(distSensorPosition);
+            setCurrentPosition(distSensorPosition);
         else if(cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;
