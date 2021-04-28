@@ -115,6 +115,7 @@ public class Movement
 
                     robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(powers[0], powers[1], powers[2], false, true));
                     if(robot.robotSettings.debug_methods || robot.positionTracker.drawDashboardField){
+                        robot.startTelemetry();
                         if(robot.robotSettings.debug_methods) {
                             robot.addTelemetry("x: ", robot.positionTracker.currentPosition.X);
                             robot.addTelemetry("y: ", robot.positionTracker.currentPosition.Y);
