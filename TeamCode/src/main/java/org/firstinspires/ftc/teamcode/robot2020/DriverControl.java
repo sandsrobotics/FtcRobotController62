@@ -51,7 +51,7 @@ public class DriverControl extends LinearOpMode
 
         while (opModeIsActive())
         {
-            robot.sendTelemetry();
+            robot.startTelemetry();
 
             robot.movement.moveForTeleOp(gamepad1, true);
             robot.grabber.runForTeleOp(gamepad1, true);
