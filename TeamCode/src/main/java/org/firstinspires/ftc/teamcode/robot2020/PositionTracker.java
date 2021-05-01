@@ -298,15 +298,15 @@ public class PositionTracker extends Thread
         }
 
         // average positions
-        if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
             setCurrentPosition(distSensorPosition);
-        else if(inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
             setCurrentPosition(distSensorPosition);
-        else if(cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
+        else if(robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;
         }
-        else
+        else if(robot.robotUsage.positionUsage.useEncoders)
             currentPosition = encoderPosition;
     }
 

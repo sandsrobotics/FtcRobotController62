@@ -190,6 +190,12 @@ public class Grabber {
         moveServos();
     }
 
+    //LK
+    void setGrabberToIntakeOff(){
+        setIntakeMode((short) 0);
+        moveServos();
+    }
+
     void runGrabberIntake(int maxWaitTime){
         setIntakeMode((short) 1);
         moveServos();
@@ -251,6 +257,7 @@ class GrabberSettings
 
     //preset lifter functions
     protected int capturePos = 1400; //position of grabber arm when grabbing a wobble goal
+    protected int drivePos = 1200;
     protected int horizontalPos = -50; //position of grabber arm when in storage
     protected int putOverPos = 950; //position of grabber arm to put the wobble goal over the wall
     protected int restPos = 1450; //position of grabber arm when at rest on the side of robot

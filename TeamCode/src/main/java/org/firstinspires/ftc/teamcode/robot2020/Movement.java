@@ -281,6 +281,8 @@ class MovementSettings
     //presets
     MoveToPositionSettings finalPosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 20, 10000, 1);
     MoveToPositionSettings losePosSettings = new MoveToPositionSettings(new double[]{4, 4, 7.5}, 1, 10000, 1);
+    MoveToPositionSettings capturePosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 20, 3000, 1);
+    MoveToPositionSettings mediumPosSettings = new MoveToPositionSettings(new double[]{1.5, 1.5, 1}, 20, 10000, 1);
 
     MovementSettings(){}
 }
