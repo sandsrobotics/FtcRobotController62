@@ -74,11 +74,11 @@ public class Movement
     ////////////////
     //move methods//
     ////////////////
-    void moveToPosition(Position targetPos, double[] tol, int timesToStayInTolerance, int maxLoops, PIDCoefficients moveXPID, PIDCoefficients moveYPID, PIDCoefficients turnPID, double maxSpeed)
+    void moveToPosition(Position targetPos, double[] tol, int timesToStayInTolerance, int maxTime, PIDCoefficients moveXPID, PIDCoefficients moveYPID, PIDCoefficients turnPID, double maxSpeed)
     {
         if(robot.robotUsage.positionUsage.positionTrackingEnabled())
         {
-            int loops = 0;
+            long startTime = System.currentTimeMillis();
             Position currentPos = robot.positionTracker.currentPosition;
 
             if (Math.abs(targetPos.X - currentPos.X) > tol[0] || Math.abs(targetPos.Y - currentPos.Y) > tol[1] || Math.abs(targetPos.R - currentPos.R) > tol[2]) {
@@ -93,7 +93,7 @@ public class Movement
 
                 int numOfTimesInTolerance = 0;
 
-                while (!robot.stop() && (loops < maxLoops) && (numOfTimesInTolerance < timesToStayInTolerance)) {
+                while (!robot.stop() && (System.currentTimeMillis() - startTime < maxTime) && (numOfTimesInTolerance < timesToStayInTolerance)) {
                     currentPos = robot.positionTracker.currentPosition;
 
                     //calculate the error vector
@@ -126,7 +126,6 @@ public class Movement
                         robot.positionTracker.drawAllPositions();
                         robot.sendTelemetry();
                     }
-                    loops++;
                 }
             }
             robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);

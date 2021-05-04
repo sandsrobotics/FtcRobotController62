@@ -181,19 +181,20 @@ public class Autonomous extends LinearOpMode {
 
         robot.grabber.setGrabberToIntakeOff();
 
-        robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.drivePos, false);
-        //robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
+        if(!robot.robotHardware.grabberIntakeLimitSwitch.getState()) {
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.drivePos, false);
+            //robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
 
-        //drop off second goal
-        if(finalNumOfRings == 4){
-            robot.movement.moveToPosition(basePos, robot.movement.movementSettings.losePosSettings);
+            //drop off second goal
+            if (finalNumOfRings == 4) {
+                robot.movement.moveToPosition(basePos, robot.movement.movementSettings.losePosSettings);
+            }
+            //robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos - 70, false);
+            goToDropZone(finalNumOfRings, 2);
+            robot.grabber.runGrabberOuttake(true);
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.restPos, false);
         }
-        //robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos - 70, false);
-        goToDropZone(finalNumOfRings, 2);
-        robot.grabber.runGrabberOuttake(true, 500);
-        robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.restPos, false);
-
-        robot.robotUsage.positionUsage.useDistanceSensors = false;
+        //robot.robotUsage.positionUsage.useDistanceSensors = false;
 
         //robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(3,-7, 0), robot.movement.movementSettings.losePosSettings);
 

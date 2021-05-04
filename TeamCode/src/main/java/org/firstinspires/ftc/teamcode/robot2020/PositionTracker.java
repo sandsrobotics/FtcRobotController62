@@ -43,6 +43,9 @@ public class PositionTracker extends Thread
     private int inMeasuringRange = -2;
     public volatile Position distSensorPosition = new Position();
 
+    private int currentSensor = 0;
+    private boolean distanceSensorUpdated = false;
+
     //camera
     static T265Camera slamra = null;
     private Position cameraOffset = new Position();
@@ -126,10 +129,9 @@ public class PositionTracker extends Thread
 
     private double distanceFromClosestIncrement() { return Math.abs(currentPosition.R - (inMeasuringRange * 90)); }
 
-    private void updatePosWithDistanceSensor(boolean useCorrection)
+    private void updatePosFromLastDistanceSensors()
     {
         if(inMeasuringRange > -2) {
-            sleepTillNextSensorReading();
             float[] temp = robot.robotHardware.getDistancesAfterMeasure(robot.robotHardware.distSensors);
 
             int arrayPos = inMeasuringRange;
@@ -164,21 +166,27 @@ public class PositionTracker extends Thread
             distSensorPosition.X = calcDis[0];
             distSensorPosition.Y = calcDis[1];
             distSensorPosition.R = currentPosition.R;
+            distanceSensorUpdated = true;
         }
     }
 
     private void updateDistanceSensor(int sensor)
     {
-        sleepTillNextSensorReading();
         robot.robotHardware.distSensors.get(sensor - 1).measureRange();
         lastSensorReadingTime = System.currentTimeMillis();
     }
 
-    private void sleepTillNextSensorReading()
-    {
-        int timeTillNextRead = positionSettings.minDelayBetweenSensorReadings - (int)(System.currentTimeMillis() - lastSensorReadingTime);
-        if(timeTillNextRead > 0) {
-            robot.sleep(timeTillNextRead);
+    void getPosFromDistanceSensor(){
+        if(System.currentTimeMillis() - lastSensorReadingTime >= positionSettings.minDelayBetweenSensorReadings){
+            if(currentSensor == 0){
+                updateDistanceSensor(1);
+                currentSensor = 1;
+            }
+            else{
+                updateDistanceSensor(2);
+                updatePosFromLastDistanceSensors();
+                currentSensor = 0;
+            }
         }
     }
 
@@ -196,7 +204,6 @@ public class PositionTracker extends Thread
         Position curPos = getPositionFromCam();
         cameraOffset.X = -curPos.X + pos.X;
         cameraOffset.Y = -curPos.Y + pos.Y;
-        //cameraOffset.R = -curPos.R + pos.R;
     }
 
     private Position getPositionFromCam(){
@@ -273,34 +280,19 @@ public class PositionTracker extends Thread
         //get positions
         updateRot();
 
-        if(robot.robotUsage.positionUsage.useDistanceSensors) {
-            inMeasuringRange = isRobotInRotationRange();
-
-            if (inMeasuringRange > -2) {
-                updateDistanceSensor(1);
-            }
-            else robot.sleep(positionSettings.imuDelay);
+        if(robot.robotUsage.positionUsage.useDistanceSensors){
+            distanceSensorUpdated = false;
+            getPosFromDistanceSensor();
         }
-        else robot.sleep(positionSettings.imuDelay);
 
         if(robot.robotUsage.positionUsage.useEncoders) getPosFromEncoder();
 
-        if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
-        {
-            updateDistanceSensor(2);
-        }
-
         if(robot.robotUsage.positionUsage.useCamera) getPosFromCam();
 
-        if(inMeasuringRange > -2 && robot.robotUsage.positionUsage.useDistanceSensors)
-        {
-            updatePosWithDistanceSensor(false);
-        }
-
         // average positions
-        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && distanceSensorUpdated && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
             setCurrentPosition(distSensorPosition);
-        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && distanceSensorUpdated && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
             setCurrentPosition(distSensorPosition);
         else if(robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;

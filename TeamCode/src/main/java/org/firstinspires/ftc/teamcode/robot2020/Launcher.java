@@ -458,7 +458,7 @@ class LauncherSettings
     double[] stowPos = {0,0};
     int delayBetweenFrogLegs = 30;
     int timeToOpenFrogLegs = 200;
-    int timeToCloseFrogLegs = 100;
+    int timeToCloseFrogLegs = 200;
 
     //other
     double startRPM = autoLaunchRPM;
