@@ -84,7 +84,6 @@ public class Autonomous extends LinearOpMode {
         robot.positionTracker.positionSettings.startPosMode = 1;
 
         robot.vision.tofdActivationSequence();
-        robot.startTelemetry();
 
         //lk changes
         robot.start(false, true);
@@ -100,6 +99,8 @@ public class Autonomous extends LinearOpMode {
                 robot.grabber.setIntakeMode((short) 0);
                 robot.grabber.moveServos();
             }
+
+            robot.startTelemetry();
 
             calculatedNumOfRings = getNumOfRings();
             if(calculatedNumOfRings == -1) robot.addTelemetry("rings", " calculating...");
