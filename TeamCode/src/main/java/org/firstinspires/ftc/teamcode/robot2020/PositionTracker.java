@@ -178,15 +178,18 @@ public class PositionTracker extends Thread
 
     void getPosFromDistanceSensor(){
         if(System.currentTimeMillis() - lastSensorReadingTime >= positionSettings.minDelayBetweenSensorReadings){
-            if(currentSensor == 0){
-                updateDistanceSensor(1);
-                currentSensor = 1;
+            inMeasuringRange = isRobotInRotationRange();
+            if(inMeasuringRange > -2) {
+                if (currentSensor == 0) {
+                    updateDistanceSensor(1);
+                    currentSensor = 1;
+                } else {
+                    updateDistanceSensor(2);
+                    updatePosFromLastDistanceSensors();
+                    currentSensor = 0;
+                }
             }
-            else{
-                updateDistanceSensor(2);
-                updatePosFromLastDistanceSensors();
-                currentSensor = 0;
-            }
+            else currentSensor = 0;
         }
     }
 
