@@ -294,9 +294,9 @@ public class PositionTracker extends Thread
 
         // average positions
         if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && distanceSensorUpdated && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPosition(distSensorPosition);
+            currentPosition = distSensorPosition.clone();
         else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && distanceSensorUpdated && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPosition(distSensorPosition);
+            currentPosition = distSensorPosition.clone();
         else if(robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;
