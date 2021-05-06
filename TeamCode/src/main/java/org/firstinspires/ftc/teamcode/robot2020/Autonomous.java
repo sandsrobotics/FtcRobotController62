@@ -26,14 +26,13 @@ public class Autonomous extends LinearOpMode {
         new Position(6,-48,-90)
     };
     Position[] CPositions = {
-        new Position(-20,-14,-90), //-25
+        new Position(-20,-14,-90),
         new Position(-18,-20,-90)
     };
 
     Position[][] secondGoalPositions = {
         {
-            new Position(-10, -115, 0),  //106
-//            new Position(-2, -112, 0)
+            new Position(-10, -115, 0),
             new Position(-2, -115, 0)
         }, {
             new Position(30, -100, 180),
@@ -165,7 +164,6 @@ public class Autonomous extends LinearOpMode {
 
         //grab second goal
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos, true);
-        //robot.grabber.runGrabberIntake();
 
         robot.grabber.setGrabberToIntake();
 
