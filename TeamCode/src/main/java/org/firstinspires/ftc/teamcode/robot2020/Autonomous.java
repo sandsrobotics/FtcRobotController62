@@ -48,9 +48,6 @@ public class Autonomous extends LinearOpMode {
     ///////////////////
     //other variables//
     ///////////////////
-    //grabber
-    int straitUpPos = 500;
-
     //tfod
     int timesRingsRecognized = 0;
     int lastNumOfRings = -1;

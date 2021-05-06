@@ -157,7 +157,7 @@ public class PositionTracker extends Thread
             distSensorPosition.X = calcDis[0];
             distSensorPosition.Y = calcDis[1];
             distSensorPosition.R = currentPosition.R;
-            lastDistanceSensorUpdateTime = System.currentTimeMillis();
+            distanceSensorsUpdated = true;
         }
     }
 
@@ -288,16 +288,21 @@ public class PositionTracker extends Thread
         if(robot.robotUsage.positionUsage.useCamera) getPosFromCam();
 
         // average positions
-        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && distanceSensorsUpdated && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && distanceSensorsUpdated && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition = distSensorPosition.clone();
-        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && distanceSensorsUpdated && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+            lastDistanceSensorUpdateTime = System.currentTimeMillis();
+        }
+        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && distanceSensorsUpdated && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition = distSensorPosition.clone();
+            lastDistanceSensorUpdateTime = System.currentTimeMillis();
+        }
         else if(!isDistanceSensorPositionValid() && robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;
         }
-        else if(robot.robotUsage.positionUsage.useEncoders)
+        else if(robot.robotUsage.positionUsage.useEncoders) {
             currentPosition = encoderPosition;
+        }
     }
 
     void initAll(){
