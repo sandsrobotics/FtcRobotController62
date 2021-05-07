@@ -206,6 +206,9 @@ public class Launcher {
     //////////////////////////////////////
     void powerShotStart(){
         openGateServoNoDelay();
+        if(frogLegPos != -1){
+            stowFrogLegs(false);
+        }
         setRPM(launcherSettings.powerShotRPM);
     }
 
