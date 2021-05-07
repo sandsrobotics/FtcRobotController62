@@ -317,6 +317,7 @@ public class PositionTracker extends Thread
         initAll();
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
             updateAllPos();
+            robot.sleep(100);
         }
 
         if(robot.robotUsage.positionUsage.useCamera) endCam();
