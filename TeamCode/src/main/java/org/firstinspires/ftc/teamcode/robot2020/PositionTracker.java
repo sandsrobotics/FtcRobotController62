@@ -293,7 +293,7 @@ public class PositionTracker extends Thread
             lastDistanceSensorUpdateTime = System.currentTimeMillis();
         }
         else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && distanceSensorsUpdated && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
-            setCurrentPosition(distSensorPosition);
+            currentPosition = distSensorPosition.clone();
             lastDistanceSensorUpdateTime = System.currentTimeMillis();
         }
         else if(!isDistanceSensorPositionValid() && robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
