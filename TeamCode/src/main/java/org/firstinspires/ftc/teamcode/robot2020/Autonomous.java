@@ -18,16 +18,16 @@ public class Autonomous extends LinearOpMode {
     Position basePos = new Position(-20, -80, 0);
 
     Position[] APositions = {
-        new Position(-20,-62,-90),
-        new Position(-18,-68,-90)
+        new Position(-22,-62,-90),
+        new Position(-18,-72,-90)
     };
     Position[] BPositions = {
         new Position(-1,-38,-90),
         new Position(6,-48,-90)
     };
     Position[] CPositions = {
-        new Position(-20,-14,-90), //-25
-        new Position(-18,-20,-90)
+        new Position(-22,-18,-90), //-25
+        new Position(-18,-24,-90)
     };
 
     Position[][] secondGoalPositions = {
@@ -49,9 +49,6 @@ public class Autonomous extends LinearOpMode {
     ///////////////////
     //other variables//
     ///////////////////
-    //grabber
-    int straitUpPos = 500;
-
     //tfod
     int timesRingsRecognized = 0;
     int lastNumOfRings = -1;
@@ -138,7 +135,7 @@ public class Autonomous extends LinearOpMode {
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, false);
 
         //launch power shot
-        robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos);
+        robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos, false);
         robot.launcher.setRPM(0);
 
         //drop goal one
@@ -201,8 +198,6 @@ public class Autonomous extends LinearOpMode {
         robot.movement.moveToPosition(parkPos,robot.movement.movementSettings.finalPosSettings);
 
         robot.launcher.setFrogLegPos(0,true);
-
-        robot.stop();
     }
 
 

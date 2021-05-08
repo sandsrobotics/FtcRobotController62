@@ -13,7 +13,7 @@ public class DriverControl extends LinearOpMode
     GamepadButtonManager semiAutoLaunchButton;
     GamepadButtonManager pointToZero;
     GamepadButtonManager RPMChange;
-    GamepadButtonManager resetAngle;
+    GamepadButtonManager resetPos;
     GamepadButtonManager wobbleGaolDrop;
     GamepadButtonManager autoLaunchPowerShot;
     GamepadButtonManager autoLaunchPowerShot2;
@@ -39,7 +39,7 @@ public class DriverControl extends LinearOpMode
         semiAutoLaunchButton = new GamepadButtonManager(gamepad2, GamepadButtons.dpadLEFT);
         pointToZero = new GamepadButtonManager(gamepad2, GamepadButtons.dpadRIGHT);
         RPMChange = new GamepadButtonManager(gamepad2, GamepadButtons.leftBUMPER);
-        resetAngle = new GamepadButtonManager(gamepad1, GamepadButtons.rightBUMPER);
+        resetPos = new GamepadButtonManager(gamepad1, GamepadButtons.rightBUMPER);
         wobbleGaolDrop = new GamepadButtonManager(gamepad1, GamepadButtons.A);
         autoLaunchPowerShot = new GamepadButtonManager(gamepad2, GamepadButtons.leftJoyStickBUTTON);
         autoLaunchPowerShot2 = new GamepadButtonManager(gamepad2, GamepadButtons.rightJoyStickBUTTON);
@@ -69,16 +69,19 @@ public class DriverControl extends LinearOpMode
             else if(wobbleGaolDrop.getButtonHeld())
                 robot.grabber.autoDrop();
             else if(autoLaunchPowerShot.getButtonHeld())
-                robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos);
+                robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos, true);
             else if(autoLaunchPowerShot2.getButtonHeld())
-                robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPosV2);
+                robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPosV2, true);
 
             if(RPMChange.getButtonPressed())
             {
               if(robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM){robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;}
               else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
             }
-            if(resetAngle.getButtonPressed()) robot.positionTracker.resetAngle();
+            if(resetPos.getButtonPressed()){
+                robot.positionTracker.resetAngle();
+                robot.positionTracker.setCurrentPositionNoRot(new Position(-28,-51,0));
+            }
             if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
             else robot.movement.setSpeedMultiplier(1);
 
@@ -88,7 +91,5 @@ public class DriverControl extends LinearOpMode
 
             robot.sendTelemetry();
         }
-
-        robot.stop();
     }
 }

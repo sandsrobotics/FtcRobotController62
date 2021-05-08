@@ -240,6 +240,7 @@ public class Grabber {
             setGrabberToPos(grabberSettings.putOverPos, false);
             robot.movement.moveToPosition(new Position(robot.positionTracker.currentPosition.X, -123, 90), robot.movement.movementSettings.finalPosSettings);
             //setServosToPos(robot.grabber.grabberSettings.servoRestPositions, false);
+            runGrabberOuttake(true);
             robot.movement.moveToPosition((robot.positionTracker.getPositionWithOffset(0, 10, 0)), robot.movement.movementSettings.losePosSettings);
             setGrabberToPos(grabberSettings.capturePos, false);
         }

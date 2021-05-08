@@ -188,7 +188,7 @@ public class PositionTracker extends Thread
     void initCam()
     {
         if(slamra == null) slamra = new T265Camera(positionSettings.cameraToRobot, positionSettings.encoderMeasurementCovariance, robot.hardwareMap.appContext);
-        slamra.start();
+        if(!slamra.isStarted()) slamra.start();
     }
 
     void setCurrentCamPos(Position pos)
@@ -238,12 +238,15 @@ public class PositionTracker extends Thread
     //////////////////
     void setCurrentPosition(Position pos){
         currentPosition = pos.clone();
+        updateRot();
+        rotationOffset += currentPosition.R - pos.R;
+
         if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(currentPosition);
     }
 
     void setCurrentPositionNoRot(Position pos){
-        pos.R = currentPosition.R;
-        setCurrentPosition(pos);
+        currentPosition = pos.clone();
+        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(currentPosition);
     }
 
     Position getStartPos()
@@ -299,9 +302,9 @@ public class PositionTracker extends Thread
 
         // average positions
         if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPosition(distSensorPosition);
+            setCurrentPositionNoRot(distSensorPosition);
         else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
-            setCurrentPosition(distSensorPosition);
+            setCurrentPositionNoRot(distSensorPosition);
         else if(robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;

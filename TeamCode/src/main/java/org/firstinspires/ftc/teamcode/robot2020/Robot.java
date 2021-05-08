@@ -127,15 +127,6 @@ public class Robot
         if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs();
     }
 
-    void stop()
-    {
-        if(robotUsage.positionUsage.positionTrackingEnabled()){
-            positionTracker.writePositionToFile();
-            if(robotUsage.positionUsage.useCamera)positionTracker.endCam();
-            positionTracker.interrupt();
-        }
-    }
-
     /////////////
     //telemetry//
     /////////////

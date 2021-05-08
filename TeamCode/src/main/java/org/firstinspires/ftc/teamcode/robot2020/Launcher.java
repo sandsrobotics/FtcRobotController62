@@ -204,9 +204,9 @@ public class Launcher {
     //////////////////////////////////////
     //auto launcher control - power shot//
     //////////////////////////////////////
-    void powerShotStart(){
+    void powerShotStart(boolean stowFrogLegs){
         openGateServoNoDelay();
-        if(frogLegPos != -1){
+        if(frogLegPos != -1 && stowFrogLegs){
             stowFrogLegs(false);
         }
         setRPM(launcherSettings.powerShotRPM);
@@ -218,13 +218,13 @@ public class Launcher {
         closeGateServo();
     }
 
-    void autoLaunchPowerShots(Position[] positions)
+    void autoLaunchPowerShots(Position[] positions, boolean stowFrogLegs)
     {
         if(!robot.robotUsage.useDrive) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
         else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
         else
         {
-            powerShotStart();
+            powerShotStart(stowFrogLegs);
             for(int i = 0; i < 3; i++) {
                 robot.movement.moveToPosition(positions[i], robot.movement.movementSettings.finalPosSettings);
                 waitForRPMInTolerance(1000);
@@ -459,7 +459,7 @@ class LauncherSettings
 
     //frog legs
     double[][] frogLegPos = {
-    {.5,.5},
+    {.5,.475},
     {.7,.7},
     {.9,.9}};
     double stowPos = 0;
