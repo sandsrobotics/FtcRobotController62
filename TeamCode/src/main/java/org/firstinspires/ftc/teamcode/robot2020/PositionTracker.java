@@ -325,7 +325,6 @@ public class PositionTracker extends Thread
         }
 
         if(robot.robotUsage.positionUsage.useCamera) endCam();
-
         writePositionToFile();
     }
 
@@ -382,7 +381,7 @@ public class PositionTracker extends Thread
 
 
     ///////////////
-    //stop thread//
+    //isStop thread//
     ///////////////
     void stopPosition()
     {

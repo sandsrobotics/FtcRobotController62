@@ -292,7 +292,7 @@ public class Launcher {
     void waitForRPMInTolerance(long maxMs, double targetWheelRpm, double RPMTolerance)
     {
         long startTime = System.currentTimeMillis();
-        while(!robot.stop() && System.currentTimeMillis() - startTime < maxMs)
+        while(!robot.isStop() && System.currentTimeMillis() - startTime < maxMs)
         {
             if(isRPMInTolerance(targetWheelRpm, RPMTolerance)) break;
         }
@@ -336,6 +336,7 @@ public class Launcher {
     {
         if(isRPMInTolerance())
         {
+            if(frogLegPos != -1) stowFrogLegs(true);
             if(!gateOpen) openGateServo();
             moveLaunchServo();
             robot.delay(launcherSettings.launcherServoMoveTime);
@@ -348,9 +349,9 @@ public class Launcher {
     void setFrogLegPos(int pos, boolean delayBetween){
         if(pos >= 0 && lastfrogLegPos != pos) {
             if (frogLegPos < 0) unstowFrogLegs(true);
-            robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
+            robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.frogLegPos[pos][0]);
             if (delayBetween) robot.delay(launcherSettings.delayBetweenFrogLegs);
-            robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[pos][1]);
+            robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.frogLegPos[pos][1]);
             frogLegPos = pos;
             lastfrogLegPos = pos;
         }
@@ -362,9 +363,9 @@ public class Launcher {
 
     void initFrogLegs(){
         if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
-        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[0][0]);
+        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.frogLegPos[0][0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
-        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[0][1]);
+        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.frogLegPos[0][1]);
         robot.delay(launcherSettings.timeToOpenFrogLegs);
         if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
         frogLegPos = 0;
@@ -372,20 +373,22 @@ public class Launcher {
 
     void unstowFrogLegs(boolean useDelay){
         if(robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor.getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
-        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.stowPos[0]);
+        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.frogLegPos[0][0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
-        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.stowPos[1]);
+        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.frogLegPos[0][1]);
         if(useDelay) robot.delay(launcherSettings.timeToOpenFrogLegs);
         frogLegPos = 0;
     }
 
     void stowFrogLegs(boolean useDelay){
-        if(robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor.getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
-        robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.stowPos[0]);
-        robot.delay(launcherSettings.delayBetweenFrogLegs);
-        robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.stowPos[1]);
-        if(useDelay) robot.delay(launcherSettings.timeToCloseFrogLegs);
-        frogLegPos = -1;
+        if(frogLegPos != -1) {
+            if(frogLegPos != 0) setFrogLegPos(0, false);
+            if (robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor.getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos)
+                robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+            robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.stowPos);
+            if (useDelay) robot.delay(launcherSettings.timeToCloseFrogLegs);
+            frogLegPos = -1;
+        }
     }
 
 
@@ -455,11 +458,11 @@ class LauncherSettings
     };
 
     //frog legs
-    double[][] FrogLegPos = {
+    double[][] frogLegPos = {
     {.5,.5},
     {.7,.7},
     {.9,.9}};
-    double[] stowPos = {0,0};
+    double stowPos = 0;
     int delayBetweenFrogLegs = 30;
     int timeToOpenFrogLegs = 200;
     int timeToCloseFrogLegs = 100;

@@ -127,6 +127,15 @@ public class Robot
         if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs();
     }
 
+    void stop()
+    {
+        if(robotUsage.positionUsage.positionTrackingEnabled()){
+            positionTracker.writePositionToFile();
+            if(robotUsage.positionUsage.useCamera)positionTracker.endCam();
+            positionTracker.interrupt();
+        }
+    }
+
     /////////////
     //telemetry//
     /////////////
@@ -201,7 +210,7 @@ public class Robot
         long last = System.currentTimeMillis();
         while(System.currentTimeMillis() - last < ms)
         {
-            if(stop())break;
+            if(isStop())break;
         }
     }
 
@@ -214,7 +223,7 @@ public class Robot
         }
     }
 
-    boolean stop() { return emergencyStop || gamepad1.back || gamepad2.back || opMode.isStopRequested(); }
+    boolean isStop() { return emergencyStop || gamepad1.back || gamepad2.back || opMode.isStopRequested(); }
 }
 
 class RobotUsage

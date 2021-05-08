@@ -317,7 +317,7 @@ public class RobotHardware
         while(totalMotorsDone < motors.size())
         {
             totalMotorsDone = 0;
-            if (robot.stop()) break;
+            if (robot.isStop()) break;
             for (DcMotorEx motor : motors)
             {
                 if(!motor.isBusy()) totalMotorsDone++;

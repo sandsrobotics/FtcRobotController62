@@ -44,7 +44,7 @@ public class Movement
             int numberOfTimesInTolerance = 0;
             PID pid = new PID(turnPID, -maxSpeed, maxSpeed);
 
-            while (numberOfTimesInTolerance < numberOfTimesToStayInTolerance && maxRuntime > 0 && !robot.stop())
+            while (numberOfTimesInTolerance < numberOfTimesToStayInTolerance && maxRuntime > 0 && !robot.isStop())
             {
                 error = robot.findAngleError(robot.positionTracker.currentPosition.R, targetAngle);
                 pid.updatePID(error);
@@ -93,7 +93,7 @@ public class Movement
 
                 int numOfTimesInTolerance = 0;
 
-                while (!robot.stop() && (loops < maxLoops) && (numOfTimesInTolerance < timesToStayInTolerance)) {
+                while (!robot.isStop() && (loops < maxLoops) && (numOfTimesInTolerance < timesToStayInTolerance)) {
                     currentPos = robot.positionTracker.currentPosition;
 
                     //calculate the error vector
@@ -264,8 +264,8 @@ class MovementSettings
     //user variables//
     //////////////////
     public PIDCoefficients turnPID = new PIDCoefficients(.03,0,0);
-    public PIDCoefficients moveXPID = new PIDCoefficients(.07,0,0);
-    public PIDCoefficients moveYPID = new PIDCoefficients(.07,0,0);
+    public PIDCoefficients moveXPID = new PIDCoefficients(.06,0,0);
+    public PIDCoefficients moveYPID = new PIDCoefficients(.06,0,0);
     public double moveXSmoothingSteps = 1;
     public double moveYSmoothingSteps = 1;
     public double rotationSmoothingSteps = 1;

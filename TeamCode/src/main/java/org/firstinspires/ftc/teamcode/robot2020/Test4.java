@@ -30,7 +30,7 @@ public class Test4 extends LinearOpMode
 
         waitForStart();
 
-        while(!robot.stop() && opModeIsActive())
+        while(!robot.isStop() && opModeIsActive())
         {
             robot.startTelemetry();
 
@@ -38,7 +38,7 @@ public class Test4 extends LinearOpMode
             {
                 robot.addTelemetry("Robot: ", "recording");
                 robot.sendTelemetry();
-                while (robot.complexMovement.isRecording && !robot.stop()) { robot.complexMovement.recorder(true); }
+                while (robot.complexMovement.isRecording && !robot.isStop()) { robot.complexMovement.recorder(true); }
                 robot.addTelemetry("Robot: ", "done recording");
                 robot.sendTelemetry();
                 robot.complexMovement.stopRecording(true, "test");

@@ -38,7 +38,7 @@ public class Grabber {
         if(robot.robotHardware.grabberArmLimitSwitch.getState())
         {
             int pos = 0;
-            while(robot.robotHardware.grabberArmLimitSwitch.getState() && !robot.stop())
+            while(robot.robotHardware.grabberArmLimitSwitch.getState() && !robot.isStop())
             {
                 pos -= grabberSettings.homingSpeed;
                 robot.robotHardware.grabberLifterMotor.setTargetPosition(pos);
@@ -147,7 +147,7 @@ public class Grabber {
     {
         setEncoderSetPos(pos);
         moveMotors();
-        while(robot.robotHardware.grabberLifterMotor.isBusy() && !robot.stop() && waitForMotor) { if(stopMotor()) break; }
+        while(robot.robotHardware.grabberLifterMotor.isBusy() && !robot.isStop() && waitForMotor) { if(stopMotor()) break; }
     }
 
     void setEncoderSetPos(int pos){

@@ -49,7 +49,7 @@ public class ComplexMovement {
         {
             if(curRecordingLength + measureDelay > maxTime && stopAtMaxTime)
             {
-                if(robot.robotSettings.debug_methods)robot.addTelemetry("ComplexMovement.recorder has stopped recording: ", "this recording has stopped at time " + curRecordingLength + " ms: stop recording to make file");
+                if(robot.robotSettings.debug_methods)robot.addTelemetry("ComplexMovement.recorder has stopped recording: ", "this recording has stopped at time " + curRecordingLength + " ms: isStop recording to make file");
                 isRecording = false;
             }
             else
@@ -231,7 +231,7 @@ public class ComplexMovement {
 
             double startMs = System.currentTimeMillis();
 
-            while (!robot.stop()) {
+            while (!robot.isStop()) {
                 if (curInstruction * loaded_MeasureDelay <= System.currentTimeMillis() - startMs) {
                     for (int m = 0; m < 4; m++) {
                         robot.robotHardware.driveMotors.get(m).setTargetPosition(loaded_Positions.get(curInstruction)[m] + motorStartPos[m]);
@@ -243,13 +243,13 @@ public class ComplexMovement {
                     robot.robotHardware.setMotorsRunModeList(robot.robotHardware.driveMotors, DcMotor.RunMode.RUN_TO_POSITION);
                     start = false;
                 }
-                if (curInstruction == loaded_Positions.size() || robot.stop()) break;
+                if (curInstruction == loaded_Positions.size() || robot.isStop()) break;
                 if (stopIfTimeIsMoreThanMoveTime && System.currentTimeMillis() - startMs >= loaded_TotalTime) {
                     if (robot.robotSettings.debug_methods) robot.addTelemetry("error in ComplexMovement.runLoadedMoveV2: ", "this move took longer than expected to run. Ending move...");
                     break;
                 }
             }
-            while(!robot.robotHardware.motorPositionsInToleranceList(robot.robotHardware.driveMotors, 5) && !stopIfTimeIsMoreThanMoveTime){if(robot.stop()) break;}
+            while(!robot.robotHardware.motorPositionsInToleranceList(robot.robotHardware.driveMotors, 5) && !stopIfTimeIsMoreThanMoveTime){if(robot.isStop()) break;}
             robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);
             robot.robotHardware.setMotorsRunModeList(robot.robotHardware.driveMotors, DcMotor.RunMode.RUN_USING_ENCODER);
             robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);

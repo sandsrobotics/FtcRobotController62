@@ -200,7 +200,9 @@ public class Autonomous extends LinearOpMode {
         //park
         robot.movement.moveToPosition(parkPos,robot.movement.movementSettings.finalPosSettings);
 
-        robot.positionTracker.writePositionToFile();
+        robot.launcher.setFrogLegPos(0,true);
+
+        robot.stop();
     }
 
 

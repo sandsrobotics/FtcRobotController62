@@ -29,10 +29,9 @@ public class DriverControl extends LinearOpMode
         RobotUsage ru = new RobotUsage();
         ru.visionUsage.useVuforia = false;
         ru.useComplexMovement = false;
-        //ru.visionUsage.useTensorFlow = false;
 
         robot = new Robot(this, ru);
-
+        robot.positionTracker.positionSettings.startPosMode = 2;
 
         waitForStart();
 
@@ -89,5 +88,7 @@ public class DriverControl extends LinearOpMode
 
             robot.sendTelemetry();
         }
+
+        robot.stop();
     }
 }
