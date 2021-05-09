@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.robot2020.persistence.Movement.MovementEntity;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.os.SystemClock.sleep;
-
+@Disabled
 @Config
 public class ComplexMovement {
 

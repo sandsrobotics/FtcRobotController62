@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -48,6 +49,10 @@ public class RobotHardware
     //protected DFR304Range distSensorX2;
     protected DFR304Range distSensor2;
 
+    // blinkin
+    private RevBlinkinLedDriver BlinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
+
     //other class
     Robot robot;
     HardwareSettings hardwareSettings;
@@ -73,7 +78,6 @@ public class RobotHardware
         rightTopMotor = robot.hardwareMap.get(DcMotorEx.class,"motor" + hardwareSettings.rightTopMotorNum);
         rightBottomMotor = robot.hardwareMap.get(DcMotorEx.class,"motor" + hardwareSettings.rightBottomMotorNum);
         driveMotors = Arrays.asList(leftTopMotor, leftBottomMotor, rightTopMotor, rightBottomMotor);
-
         int i = 0;
         for(DcMotor motor:driveMotors)
         {
@@ -147,9 +151,9 @@ public class RobotHardware
 
     public void initUltrasonicSensors()
     {
-        distSensor1 = robot. hardwareMap.get(DFR304Range.class, "distSensor" + hardwareSettings.Ultrasonic1Num);
+        distSensor1 = robot.hardwareMap.get(DFR304Range.class, "distSensor" + hardwareSettings.Ultrasonic1Num);
        // distSensorX2 = robot. hardwareMap.get(DFR304Range.class, "distSensor" + hardwareSettings.X2UltrasonicNum);
-        distSensor2 = robot. hardwareMap.get(DFR304Range.class, "distSensor" + hardwareSettings.Ultrasonic2Num);
+        distSensor2 = robot.hardwareMap.get(DFR304Range.class, "distSensor" + hardwareSettings.Ultrasonic2Num);
         //distSensors = Arrays.asList(distSensor1,distSensorX2,distSensor2);
         distSensors = Arrays.asList(distSensor1, distSensor2);
 
@@ -157,6 +161,11 @@ public class RobotHardware
         parameters.maxRange = DFR304Range.MaxRange.CM500;
         parameters.measureMode = DFR304Range.MeasureMode.PASSIVE;
         for(DFR304Range distSen : distSensors) { distSen.initialize(parameters); }
+    }
+
+    public void initBlinkin()
+    {
+        BlinkinLedDriver = robot.hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
     }
 
     public void initMotorSettings(List<DcMotorEx> motors, DcMotor.ZeroPowerBehavior zeroPowerBehavior) { for(DcMotorEx motor:motors) initMotorSettings(motor, zeroPowerBehavior); }
