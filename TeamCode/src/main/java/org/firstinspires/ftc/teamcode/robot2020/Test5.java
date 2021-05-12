@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.robot2020.GamepadButtonManager;
 import org.firstinspires.ftc.teamcode.robot2020.GamepadButtons;
 import org.firstinspires.ftc.teamcode.robot2020.Robot;
 import org.firstinspires.ftc.teamcode.robot2020.RobotUsage;
-
+@Disabled
 @Config
 @TeleOp(name = "test positionTracker tracking camera")
 @Disabled
