@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot2020;
 
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp(name = "tune PIDF")
 @Config
+@Disabled
 public class Test2 extends LinearOpMode
 {
     Robot robot;
@@ -43,7 +45,7 @@ public class Test2 extends LinearOpMode
 
             if(mode == 0)
             {
-                robot.movement.moveForTeleOp(gamepad1, breakButton, true);
+                robot.movement.moveForTeleOp(gamepad1, breakButton, false, false);
                 robot.launcher.runForTeleOp(gamepad2,true);
                 robot.addTelemetry("min", 0);
                 if(autoLaunchButton.getButtonHeld()) mode = 1;

@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 // test
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "test auto move v1")
+@Disabled
 public class AutonomousMovement extends LinearOpMode {
 
     //////////////////

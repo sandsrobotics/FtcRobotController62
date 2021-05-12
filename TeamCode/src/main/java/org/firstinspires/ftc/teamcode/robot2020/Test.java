@@ -22,6 +22,7 @@ public class Test extends LinearOpMode {
         ru.positionUsage.useDistanceSensors = true;
         ru.positionUsage.useEncoders = true;
         ru.positionUsage.useCamera = true;
+        ru.positionUsage.useLeds = true;
         ru.useDrive = true;
 
         robot = new Robot(this, ru);
@@ -33,7 +34,7 @@ public class Test extends LinearOpMode {
         while (opModeIsActive())
         {
             robot.startTelemetry();
-            robot.movement.moveForTeleOp(gamepad1, brake, false);
+            robot.movement.moveForTeleOp(gamepad1, null, false, false);
             robot.positionTracker.drawAllPositions();
             robot.addTelemetry("dist", robot.positionTracker.distSensorPosition.toString(2));
             robot.addTelemetry("enc", robot.positionTracker.encoderPosition.toString(2));

@@ -18,12 +18,12 @@ public class Autonomous extends LinearOpMode {
     Position basePos = new Position(-20, -80, 0);
 
     Position[] APositions = {
-        new Position(-22,-62,-90),
-        new Position(-18,-72,-90)
+        new Position(-22,-66,-90),
+        new Position(-18,-76,-90)
     };
     Position[] BPositions = {
-        new Position(-1,-38,-90),
-        new Position(6,-48,-90)
+        new Position(-1,-42,-90),
+        new Position(6,-56,-90)
     };
     Position[] CPositions = {
         new Position(-22,-18,-90), //-25

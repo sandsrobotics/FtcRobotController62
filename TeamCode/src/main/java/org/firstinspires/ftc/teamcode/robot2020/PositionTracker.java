@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.spartronics4915.lib.T265Camera;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -42,6 +43,9 @@ public class PositionTracker extends Thread
     private long lastSensorReadingTime = System.currentTimeMillis();
     private int inMeasuringRange = -2;
     public volatile Position distSensorPosition = new Position();
+
+    //led
+    SensorsUsed currentSensorsUsed;
 
     //camera
     static T265Camera slamra = null;
@@ -135,7 +139,7 @@ public class PositionTracker extends Thread
             int arrayPos = inMeasuringRange;
             if (inMeasuringRange == -1) arrayPos = 3;
 
-            if (positionSettings.sensorPosition[arrayPos] == SensorNum.TWO) {
+            if (positionSettings.sensorPosition[arrayPos] == DistSensorNum.TWO) {
                 float val = temp[0];
                 temp[0] = temp[1];
                 temp[1] = val;
@@ -236,9 +240,9 @@ public class PositionTracker extends Thread
     //////////////////
     //runs in thread//
     //////////////////
-    void setCurrentPosition(Position pos){
+    void setCurrentPosition(Position pos, boolean getNewRot){
         currentPosition = pos.clone();
-        updateRot();
+        if(getNewRot) updateRot();
         rotationOffset += currentPosition.R - pos.R;
 
         if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(currentPosition);
@@ -301,20 +305,30 @@ public class PositionTracker extends Thread
         }
 
         // average positions
-        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation))
+        if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useCamera && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(cameraPosition, positionSettings.maxDistanceDeviation)) {
             setCurrentPositionNoRot(distSensorPosition);
-        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation))
+            currentSensorsUsed = SensorsUsed.DISTANCE_AND_CAMERA;
+        }
+        else if(robot.robotUsage.positionUsage.useDistanceSensors && robot.robotUsage.positionUsage.useEncoders && inMeasuringRange > -2 && distSensorPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             setCurrentPositionNoRot(distSensorPosition);
+            currentSensorsUsed = SensorsUsed.DISTANCE_AND_ENCODER;
+        }
         else if(robot.robotUsage.positionUsage.useCamera && robot.robotUsage.positionUsage.useEncoders && cameraPosition.isPositionInRange(encoderPosition, positionSettings.maxDistanceDeviation)) {
             currentPosition.X = cameraPosition.X;
             currentPosition.Y = cameraPosition.Y;
+            currentSensorsUsed = SensorsUsed.CAMERA_AND_ENCODER;
         }
-        else if(robot.robotUsage.positionUsage.useEncoders)
+        else if(robot.robotUsage.positionUsage.useEncoders) {
             currentPosition = encoderPosition;
+            currentSensorsUsed = SensorsUsed.ENCODER;
+        }
+        else{
+            currentSensorsUsed = SensorsUsed.NONE;
+        }
     }
 
     void initAll(){
-        setCurrentPosition(getStartPos());
+        setCurrentPosition(getStartPos(), true);
         if(robot.robotUsage.positionUsage.useEncoders) initializeEncoderTracking();
         isInitialized = true;
     }
@@ -325,6 +339,7 @@ public class PositionTracker extends Thread
         initAll();
         while (!this.isInterrupted() && !robot.opMode.isStopRequested()) {
             updateAllPos();
+            updateLeds();
         }
 
         if(robot.robotUsage.positionUsage.useCamera) endCam();
@@ -363,6 +378,10 @@ public class PositionTracker extends Thread
             drawPosition(encoderPosition.toRad(), "yellow");
             drawPosition(currentPosition.toRad(), "blue");
         }
+    }
+
+    public void updateLeds(){
+        if(robot.robotUsage.positionUsage.useLeds) robot.robotHardware.ledDriver.setPattern(currentSensorsUsed.ledPattern);
     }
 
     ///////////////////
@@ -414,12 +433,12 @@ class PositionSettings
         new float[]{50.3932f, -127.165f}, // for 180 degrees
         new float[]{-30.314f, -126.771f}  // for -90/270 degrees
     };
-    SensorNum[] sensorPosition = new SensorNum[] // which ultra sonic sensor is in the X direction for each 90 degree increment
+    DistSensorNum[] sensorPosition = new DistSensorNum[] // which ultra sonic sensor is in the X direction for each 90 degree increment
     {
-        SensorNum.ONE, // for 0 degrees
-        SensorNum.TWO, // for 90 degrees
-        SensorNum.ONE, // for 180 degrees
-        SensorNum.TWO  // for -90/270 degrees
+        DistSensorNum.ONE, // for 0 degrees
+        DistSensorNum.TWO, // for 90 degrees
+        DistSensorNum.ONE, // for 180 degrees
+        DistSensorNum.TWO  // for -90/270 degrees
     };
     MathSign[][] operations = new MathSign[][] //whether the distance from the ultrasonic sensor should be added or removed for each 90 degree increment
     {
@@ -555,8 +574,23 @@ enum MathSign
     ADD,
     SUBTRACT
 }
-enum SensorNum
+enum DistSensorNum
 {
     ONE,
     TWO
+}
+
+enum SensorsUsed
+{
+    DISTANCE_AND_CAMERA(RevBlinkinLedDriver.BlinkinPattern.GREEN),
+    DISTANCE_AND_ENCODER(RevBlinkinLedDriver.BlinkinPattern.BLUE),
+    CAMERA_AND_ENCODER(RevBlinkinLedDriver.BlinkinPattern.YELLOW),
+    ENCODER(RevBlinkinLedDriver.BlinkinPattern.RED),
+    NONE(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
+
+    RevBlinkinLedDriver.BlinkinPattern ledPattern;
+
+    SensorsUsed(RevBlinkinLedDriver.BlinkinPattern pattern){
+        ledPattern = pattern;
+    }
 }

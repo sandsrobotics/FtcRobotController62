@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -47,6 +48,9 @@ public class RobotHardware
     protected DFR304Range distSensor1;
     //protected DFR304Range distSensorX2;
     protected DFR304Range distSensor2;
+
+    //led
+    protected RevBlinkinLedDriver ledDriver;
 
     //other class
     Robot robot;
@@ -157,6 +161,10 @@ public class RobotHardware
         parameters.maxRange = DFR304Range.MaxRange.CM500;
         parameters.measureMode = DFR304Range.MeasureMode.PASSIVE;
         for(DFR304Range distSen : distSensors) { distSen.initialize(parameters); }
+    }
+
+    public void initLedDriver(){
+        ledDriver = robot.hardwareMap.get(RevBlinkinLedDriver.class, hardwareSettings.ledDriverName);
     }
 
     public void initMotorSettings(List<DcMotorEx> motors, DcMotor.ZeroPowerBehavior zeroPowerBehavior) { for(DcMotorEx motor:motors) initMotorSettings(motor, zeroPowerBehavior); }
@@ -370,6 +378,9 @@ class HardwareSettings
     protected String Ultrasonic1Num = "0B";
     protected String X2UltrasonicNum = "2";
     protected String Ultrasonic2Num = "1B";
+
+    //led
+    protected String ledDriverName = "blinkin";
 
     HardwareSettings(){}
 }

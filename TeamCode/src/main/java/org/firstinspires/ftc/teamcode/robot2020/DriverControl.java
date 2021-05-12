@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 @Config
 @TeleOp(name = "driver control v2")
@@ -18,10 +20,10 @@ public class DriverControl extends LinearOpMode
     GamepadButtonManager autoLaunchPowerShot;
     GamepadButtonManager autoLaunchPowerShot2;
     GamepadButtonManager speedToggle;
-
-    short mode = 0;
+    GamepadButtonManager driveModeButton;
 
     double slowSpeed = 0.3;
+    boolean useHeadlessMode = false;
 
     @Override
     public void runOpMode()
@@ -44,6 +46,7 @@ public class DriverControl extends LinearOpMode
         autoLaunchPowerShot = new GamepadButtonManager(gamepad2, GamepadButtons.leftJoyStickBUTTON);
         autoLaunchPowerShot2 = new GamepadButtonManager(gamepad2, GamepadButtons.rightJoyStickBUTTON);
         speedToggle = new GamepadButtonManager(gamepad1, GamepadButtons.leftTRIGGER);
+        driveModeButton = new GamepadButtonManager(gamepad1, GamepadButtons.X);
         speedToggle.minSliderVal = 0.3;
 
         robot.start(true, false);
@@ -52,7 +55,7 @@ public class DriverControl extends LinearOpMode
         {
             robot.startTelemetry();
 
-            robot.movement.moveForTeleOp(gamepad1, true);
+            robot.movement.moveForTeleOp(gamepad1, null, useHeadlessMode, true);
             robot.grabber.runForTeleOp(gamepad1, true);
             robot.launcher.runForTeleOp(gamepad2,true);
             robot.positionTracker.drawAllPositions();
@@ -79,11 +82,11 @@ public class DriverControl extends LinearOpMode
               else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
             }
             if(resetPos.getButtonPressed()){
-                robot.positionTracker.resetAngle();
-                robot.positionTracker.setCurrentPositionNoRot(new Position(-28,-51,0));
+                robot.positionTracker.setCurrentPosition(new Position(-28,-51,0), true);
             }
             if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
             else robot.movement.setSpeedMultiplier(1);
+            if(driveModeButton.getButtonPressed()) useHeadlessMode = !useHeadlessMode;
 
             float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
             robot.addTelemetry("dist 1", dist[0]);

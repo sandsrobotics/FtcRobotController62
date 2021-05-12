@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 // test
 @Config
 @TeleOp(name = "test second goal pickup")
+@Disabled
 public class Test3 extends LinearOpMode {
 
     Robot robot;
@@ -57,7 +59,7 @@ public class Test3 extends LinearOpMode {
 
         while(opModeIsActive())
         {
-            robot.movement.moveForTeleOp(gamepad1, true);
+            //robot.movement.moveForTeleOp(gamepad1, true);
         }
     }
 }

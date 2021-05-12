@@ -49,6 +49,7 @@ public class Launcher {
         spinMultiplier = 60 / launcherSettings.ticksPerRev * launcherSettings.gearRatio;
         targetWheelRpm = launcherSettings.startRPM;
         calibrationData = AllCalibrationDataPoints.setCalibrationDataPoints(AppUtil.getDefContext(), launcherSettings.calibrationFileName);
+        launcherSettings.frogLegStowButton2.gamepad = robot.gamepad1;
     }
 
 
@@ -120,7 +121,7 @@ public class Launcher {
     }
 
     void setFrogLegServos(Gamepad gamepad){
-        if(launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
+        if(launcherSettings.frogLegStowButton1.getButtonPressed(gamepad) || launcherSettings.frogLegStowButton2.getButtonPressed()) {
             if(frogLegPos != 0) frogLegPos = 0;
             else frogLegPos = 2;
             setFrogLegPos(false);
@@ -412,7 +413,8 @@ class LauncherSettings
     GamepadButtonManager intakeInButton = new GamepadButtonManager(GamepadButtons.rightBUMPER);
     GamepadButtonManager intakeOutSlider = new GamepadButtonManager(GamepadButtons.rightTRIGGER);
     //frog Leg
-    GamepadButtonManager frogLegStowButton = new GamepadButtonManager(GamepadButtons.B);
+    GamepadButtonManager frogLegStowButton1 = new GamepadButtonManager(GamepadButtons.B);
+    GamepadButtonManager frogLegStowButton2 = new GamepadButtonManager(GamepadButtons.B);
     GamepadButtonManager frogLegToggleButton = new GamepadButtonManager(GamepadButtons.X);
 
     int buttonHoldTime = 500;

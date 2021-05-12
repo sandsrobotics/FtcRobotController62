@@ -77,7 +77,8 @@ public class Robot
         if(robotUsage.useLauncher) robotHardware.initLauncherMotors();
         if(robotUsage.visionUsage.useVision) vision.initAll();
         if(robotUsage.useGrabber) robotHardware.initGrabberHardware();
-        if(robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useDistanceSensors) { robotHardware.initUltrasonicSensors(); }
+        if(robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useDistanceSensors) robotHardware.initUltrasonicSensors();
+        if(robotUsage.positionUsage.positionTrackingEnabled() && robotUsage.positionUsage.useLeds) robotHardware.initLedDriver();
     }
 
     void initHardware()
@@ -254,7 +255,7 @@ class RobotUsage
 
 class PositionUsage
 {
-    boolean usePosition, useEncoders, useDistanceSensors, useCamera, usePositionThread;
+    boolean usePosition, useEncoders, useDistanceSensors, useCamera, useLeds, usePositionThread;
 
     PositionUsage()
     {
@@ -264,12 +265,13 @@ class PositionUsage
     {
         setAllToValue(value);
     }
-    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors, boolean useCamera)
+    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useLeds, boolean useDistanceSensors, boolean useCamera)
     {
         this.usePosition = usePosition;
         this.usePositionThread = usePositionThread;
         this.useEncoders = useEncoders;
         this.useDistanceSensors = useDistanceSensors;
+        this.useLeds = useLeds;
         this.useCamera = useCamera;
     }
 
@@ -279,6 +281,7 @@ class PositionUsage
         this.usePositionThread = value;
         this.useEncoders = value;
         this.useDistanceSensors = value;
+        this.useLeds = value;
         this.useCamera = value;
     }
 

@@ -238,7 +238,7 @@ public class Grabber {
     {
         if(robot.robotUsage.useDrive && robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             setGrabberToPos(grabberSettings.putOverPos, false);
-            robot.movement.moveToPosition(new Position(robot.positionTracker.currentPosition.X, -123, 90), robot.movement.movementSettings.finalPosSettings);
+            robot.movement.moveToPosition(new Position(0, -120, 90), robot.movement.movementSettings.wobbleGoalDropSettings);
             //setServosToPos(robot.grabber.grabberSettings.servoRestPositions, false);
             runGrabberOuttake(true);
             robot.movement.moveToPosition((robot.positionTracker.getPositionWithOffset(0, 10, 0)), robot.movement.movementSettings.losePosSettings);

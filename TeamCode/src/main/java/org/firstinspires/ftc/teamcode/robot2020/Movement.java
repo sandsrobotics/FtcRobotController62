@@ -163,20 +163,24 @@ public class Movement
     void setSpeedMultiplierToMax() { speedMultiplier = movementSettings.speedMultiplierMax; }
     void setSpeedMultiplierToMin() { speedMultiplier = movementSettings.speedMultiplierMin; }
 
-    void moveForTeleOp(Gamepad gamepad, GamepadButtonManager breakButton, boolean useTelemetry)
+    void headedMoveForTeleOp(Gamepad gamepad, GamepadButtonManager breakButton)
     {
-        if(breakButton.gamepad == null) breakButton.gamepad = gamepad;
-        if(breakButton.getButtonHeld())
-        {
-            robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);
-            lastMovePowers[0] = 0; lastMovePowers[1] = 0; lastMovePowers[2] = 0;
+        if(breakButton != null) {
+            if (breakButton.gamepad == null) breakButton.gamepad = gamepad;
+            if (breakButton.getButtonHeld()) {
+                robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);
+                lastMovePowers[0] = 0;
+                lastMovePowers[1] = 0;
+                lastMovePowers[2] = 0;
+                return;
+            }
         }
-        else robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(movementSettings.XMoveStick.getSliderValue(gamepad), -movementSettings.YMoveStick.getSliderValue(gamepad), movementSettings.RotMoveStick.getSliderValue(gamepad), true,true));
-        if(useTelemetry) teleOpTelemetry();
-    }
-    void moveForTeleOp(Gamepad gamepad, boolean useTelemetry)
-    {
         robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(movementSettings.XMoveStick.getSliderValue(gamepad), -movementSettings.YMoveStick.getSliderValue(gamepad), movementSettings.RotMoveStick.getSliderValue(gamepad), true,true));
+    }
+    void moveForTeleOp(Gamepad gamepad, GamepadButtonManager breakButton, boolean headlessMode, boolean useTelemetry)
+    {
+        if(headlessMode) headlessMoveForTeleOp(gamepad,breakButton, 90);
+        else headedMoveForTeleOp(gamepad, breakButton);
         if(useTelemetry) teleOpTelemetry();
     }
 
@@ -185,21 +189,30 @@ public class Movement
         robot.addTelemetry("rot", robot.positionTracker.currentPosition.R);
     }
 
-    /*
-    void headlessMoveForTeleOp(Gamepad gamepad1, double offset)
+
+    void headlessMoveForTeleOp(Gamepad gamepad, GamepadButtonManager breakButton, double offset)
     {
+        if(breakButton != null) {
+            if (breakButton.gamepad == null) breakButton.gamepad = gamepad;
+            if (breakButton.getButtonHeld()) {
+                robot.robotHardware.setMotorsToPowerList(robot.robotHardware.driveMotors, 0);
+                lastMovePowers[0] = 0;
+                lastMovePowers[1] = 0;
+                lastMovePowers[2] = 0;
+                return;
+            }
+        }
+
         double curAngle = -robot.positionTracker.currentPosition.R + offset;
         curAngle = robot.scaleAngle(curAngle);
-        double gamepadAngle = robot.getAngleFromXY(-gamepad1.left_stick_x, -gamepad1.left_stick_y);
+        double gamepadAngle = robot.getAngleFromXY(-gamepad.left_stick_x, -gamepad.left_stick_y);
         double error = -robot.findAngleError(curAngle,gamepadAngle);
-        double power = Math.max(Math.abs(gamepad1.left_stick_x), Math.abs(gamepad1.left_stick_y));
+        double power = Math.max(Math.abs(gamepad.left_stick_x), Math.abs(gamepad.left_stick_y));
         double[] XY = robot.getXYFromAngle(error);
         XY[0] *= power;
         XY[1] *= power;
-        robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(XY[0],XY[1],gamepad1.right_stick_x, true, true));
+        robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors, moveRobotPowers(XY[0],XY[1], gamepad.right_stick_x, true, true));
     }
-
-     */
 
     /////////
     //other//
@@ -279,10 +292,12 @@ class MovementSettings
     GamepadButtonManager RotMoveStick = new GamepadButtonManager(GamepadButtons.rightJoyStickX);
 
     //presets
-    MoveToPositionSettings finalPosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 20, 10000, 1);
+    MoveToPositionSettings finalPosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 15, 10000, 1);
     MoveToPositionSettings losePosSettings = new MoveToPositionSettings(new double[]{4, 4, 7.5}, 1, 10000, 1);
-    MoveToPositionSettings capturePosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 20, 3000, 1);
-    MoveToPositionSettings mediumPosSettings = new MoveToPositionSettings(new double[]{1.5, 1.5, 1}, 20, 10000, 1);
+    MoveToPositionSettings capturePosSettings = new MoveToPositionSettings(new double[]{.75, .75, .5}, 15, 3000, 1);
+    MoveToPositionSettings mediumPosSettings = new MoveToPositionSettings(new double[]{1.5, 1.5, 1}, 15, 10000, 1);
+    MoveToPositionSettings wobbleGoalDropSettings = new MoveToPositionSettings(new double[]{100, .75, .5}, 15, 10000, 1);
+
 
     MovementSettings(){}
 }
