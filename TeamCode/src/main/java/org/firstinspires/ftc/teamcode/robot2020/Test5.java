@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.robot2020.RobotUsage;
 @Disabled
 @Config
 @TeleOp(name = "test positionTracker tracking camera")
-@Disabled
 public class Test5 extends LinearOpMode {
 
     Robot robot;

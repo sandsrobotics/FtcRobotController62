@@ -81,8 +81,12 @@ public class DriverControl extends LinearOpMode
               if(robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM){robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;}
               else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
             }
-            if(resetPos.getButtonPressed()){
-                robot.positionTracker.setCurrentPosition(new Position(-28,-51,0), true);
+            if(resetPos.getButtonPressed()) {
+                robot.positionTracker.resetAngle();
+                if (Math.abs(robot.positionTracker.cameraPosition.R) > 4) {
+                    robot.robotUsage.positionUsage.useCamera = false;
+                }
+                robot.positionTracker.setCurrentPosition(new Position(-26.8, -48.8, 0),true);
             }
             if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
             else robot.movement.setSpeedMultiplier(1);
@@ -91,6 +95,10 @@ public class DriverControl extends LinearOpMode
             float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
             robot.addTelemetry("dist 1", dist[0]);
             robot.addTelemetry("dist 2", dist[1]);
+            robot.addTelemetry("dist", robot.positionTracker.distSensorPosition.toString(2));
+            robot.addTelemetry("enc", robot.positionTracker.encoderPosition.toString(2));
+            robot.addTelemetry("cam", robot.positionTracker.cameraPosition.toString(2));
+            robot.addTelemetry("main pos", robot.positionTracker.currentPosition.toString(2));
 
             robot.sendTelemetry();
         }

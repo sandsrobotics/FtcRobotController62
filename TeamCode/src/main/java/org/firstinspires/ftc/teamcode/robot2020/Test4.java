@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 // test
 @Config
 @TeleOp(name = "test complex movement")
-@Disabled
+
 public class Test4 extends LinearOpMode
 {
 

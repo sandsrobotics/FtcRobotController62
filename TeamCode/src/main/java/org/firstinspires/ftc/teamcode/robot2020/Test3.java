@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 // test
 @Config
 @TeleOp(name = "test second goal pickup")
-@Disabled
 public class Test3 extends LinearOpMode {
 
     Robot robot;

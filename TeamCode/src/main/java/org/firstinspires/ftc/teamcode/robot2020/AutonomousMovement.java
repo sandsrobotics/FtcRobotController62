@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 // test
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "test auto move v1")
-@Disabled
 public class AutonomousMovement extends LinearOpMode {
 
     //////////////////

@@ -250,7 +250,7 @@ public class PositionTracker extends Thread
 
     void setCurrentPositionNoRot(Position pos){
         currentPosition = pos.clone();
-        if(robot.robotUsage.positionUsage.useCamera) setCurrentCamPos(currentPosition);
+        if(robot.robotUsage.positionUsage.useCamera && robot.robotSettings.runModeIsAuto) setCurrentCamPos(currentPosition);
     }
 
     Position getStartPos()

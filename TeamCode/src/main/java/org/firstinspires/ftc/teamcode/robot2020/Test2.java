@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 @Disabled
 @TeleOp(name = "tune PIDF")
 @Config
-@Disabled
 public class Test2 extends LinearOpMode
 {
     Robot robot;

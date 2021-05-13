@@ -326,6 +326,8 @@ class RobotSettings
     /////////////
     //user data//
     /////////////
+    //pwn//
+    public boolean runModeIsAuto = false;
     //debug
     protected boolean debug_telemetry = true;
     protected boolean debug_dashboard = true; // turn this to false during competition

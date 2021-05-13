@@ -337,7 +337,7 @@ public class Launcher {
     {
         if(isRPMInTolerance())
         {
-            if(frogLegPos != -1) stowFrogLegs(true);
+            if(frogLegPos != -1                     ) stowFrogLegs(true);
             if(!gateOpen) openGateServo();
             moveLaunchServo();
             robot.delay(launcherSettings.launcherServoMoveTime);

@@ -80,6 +80,9 @@ public class Autonomous extends LinearOpMode {
 
         robot.positionTracker.positionSettings.startPosMode = 1;
 
+        //pwn//
+        //robot.robotSettings.runModeIsAuto = true;
+
         robot.vision.tofdActivationSequence();
 
         //lk changes
@@ -113,6 +116,7 @@ public class Autonomous extends LinearOpMode {
             robot.addTelemetry("enc", robot.positionTracker.encoderPosition.toString(2));
             robot.addTelemetry("cam", robot.positionTracker.cameraPosition.toString(2));
             robot.addTelemetry("main pos", robot.positionTracker.currentPosition.toString(2));
+            robot.addTelemetry("runmode is auto", robot.robotSettings.runModeIsAuto);
 
 
             robot.sendTelemetry();
