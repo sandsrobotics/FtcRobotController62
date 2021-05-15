@@ -18,16 +18,16 @@ public class Autonomous extends LinearOpMode {
     Position basePos = new Position(-20, -80, 0);
 
     Position[] APositions = {
-        new Position(-22,-66,-90),
-        new Position(-18,-76,-90)
+        new Position(-20,-64,-90),
+        new Position(-18,-75,-90)
     };
     Position[] BPositions = {
-        new Position(-1,-42,-90),
-        new Position(6,-56,-90)
+        new Position(1,-42,-90),
+        new Position(6,-54,-90)
     };
     Position[] CPositions = {
-        new Position(-22,-18,-90), //-25
-        new Position(-18,-24,-90)
+        new Position(-25,-18,-90), //-25
+        new Position(-20,-24,-90)
     };
 
     Position[][] secondGoalPositions = {
@@ -143,7 +143,7 @@ public class Autonomous extends LinearOpMode {
         robot.launcher.setRPM(0);
 
         //drop goal one
-        robot.robotUsage.positionUsage.useDistanceSensors = false;
+        //robot.robotUsage.positionUsage.useDistanceSensors = false;
         goToDropZone(finalNumOfRings, 1);
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.capturePos, true);
         robot.grabber.runGrabberOuttake(true);
@@ -194,9 +194,9 @@ public class Autonomous extends LinearOpMode {
         robot.grabber.runGrabberOuttake(true, 500);
         robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.restPos, false);
 
-        robot.robotUsage.positionUsage.useDistanceSensors = false;
+        //robot.robotUsage.positionUsage.useDistanceSensors = false;
 
-        //robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(3,-7, 0), robot.movement.movementSettings.losePosSettings);
+        robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(5,-7, 0), robot.movement.movementSettings.losePosSettings);
 
         //park
         robot.movement.moveToPosition(parkPos,robot.movement.movementSettings.finalPosSettings);

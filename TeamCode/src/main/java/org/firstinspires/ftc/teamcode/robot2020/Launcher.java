@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
-@Config
 public class Launcher {
     ///////////////////
     //other variables//
@@ -394,7 +393,7 @@ public class Launcher {
 
 
 }// class end
-
+@Config
 class LauncherSettings
 {
     //////////////////
@@ -445,7 +444,7 @@ class LauncherSettings
     double autoLaunchRPM = 3600; //RPM to launch from line
 
     //power shots
-    double powerShotRPM = 3250; //RPM to launch from power shots
+    public static double powerShotRPM = 3225; //RPM to launch from power shots
     Position[] powerShotPos = {
         new Position(18, minLaunchDistance, 0),
         new Position(25.5, minLaunchDistance, 0),
