@@ -260,7 +260,7 @@ class GrabberSettings
     protected int capturePos = 1400; //position of grabber arm when grabbing a wobble goal
     protected int drivePos = 1200;
     protected int horizontalPos = -50; //position of grabber arm when in storage
-    protected int putOverPos = 950; //position of grabber arm to put the wobble goal over the wall
+    protected int putOverPos = 860; //position of grabber arm to put the wobble goal over the wall
     protected int restPos = 1450; //position of grabber arm when at rest on the side of robot
     protected int straitUpPos = 500; //position of grabber arm when strait up from the robot
 

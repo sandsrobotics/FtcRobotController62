@@ -168,9 +168,9 @@ public class Launcher {
         else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
         else
         {
-            openGateServoNoDelay();
             setRPM(launcherSettings.autoLaunchRPM);
             goToLine();
+            if(!gateOpen) openGateServo();
 
             for(int i = 0; i < 4; i++) {
                 waitForRPMInTolerance(1000);
@@ -205,7 +205,6 @@ public class Launcher {
     //auto launcher control - power shot//
     //////////////////////////////////////
     void powerShotStart(boolean stowFrogLegs){
-        openGateServoNoDelay();
         if(frogLegPos != -1 && stowFrogLegs){
             stowFrogLegs(false);
         }
@@ -227,6 +226,7 @@ public class Launcher {
             powerShotStart(stowFrogLegs);
             for(int i = 0; i < 3; i++) {
                 robot.movement.moveToPosition(positions[i], robot.movement.movementSettings.finalPosSettings);
+                if(!gateOpen) openGateServo();
                 waitForRPMInTolerance(1000);
                 autoLaunch();
             }
@@ -361,13 +361,13 @@ public class Launcher {
         setFrogLegPos(frogLegPos, delayBetween);
     }
 
-    void initFrogLegs(){
-        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+    void initFrogLegs(int grabberPos){
+        if(grabberPos <= robot.grabber.grabberSettings.straitUpPos) grabberPos = robot.grabber.grabberSettings.straitUpPos;
+        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(grabberPos, true);
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.frogLegPos[0][0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.frogLegPos[0][1]);
-        robot.delay(launcherSettings.timeToOpenFrogLegs);
-        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
+        //robot.delay(launcherSettings.timeToOpenFrogLegs);
         frogLegPos = 0;
     }
 
@@ -444,7 +444,7 @@ class LauncherSettings
     double autoLaunchRPM = 3600; //RPM to launch from line
 
     //power shots
-    public static double powerShotRPM = 3225; //RPM to launch from power shots
+    public static double powerShotRPM = 3250; //RPM to launch from power shots
     Position[] powerShotPos = {
         new Position(18, minLaunchDistance, 0),
         new Position(25.5, minLaunchDistance, 0),
@@ -471,7 +471,7 @@ class LauncherSettings
     //other
     double startRPM = autoLaunchRPM;
     double RPMIncrements = 0;
-    double RPMTolerance = 150;
+    double RPMTolerance = 125;
 
     LauncherSettings(){}
 }

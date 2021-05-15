@@ -87,6 +87,7 @@ public class DriverControl extends LinearOpMode
                     robot.robotUsage.positionUsage.useCamera = false;
                 }
                 robot.positionTracker.setCurrentPosition(new Position(-26.8, -48.8, 0),true);
+                robot.positionTracker.updateLeds();
             }
             if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
             else robot.movement.setSpeedMultiplier(1);

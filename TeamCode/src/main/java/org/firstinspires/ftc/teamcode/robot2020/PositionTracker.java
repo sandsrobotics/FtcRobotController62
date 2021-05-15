@@ -381,7 +381,10 @@ public class PositionTracker extends Thread
     }
 
     public void updateLeds(){
-        if(robot.robotUsage.positionUsage.useLeds) robot.robotHardware.ledDriver.setPattern(currentSensorsUsed.ledPattern);
+        if(robot.robotUsage.positionUsage.positionTrackingEnabled() && robot.robotUsage.positionUsage.useLeds){
+            if(distSensorPosition.toArray() == cameraPosition.toArray() && cameraPosition.toArray() == encoderPosition.toArray()) robot.robotHardware.ledDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_GOLD);
+            else robot.robotHardware.ledDriver.setPattern(currentSensorsUsed.ledPattern);
+        }
     }
 
     ///////////////////

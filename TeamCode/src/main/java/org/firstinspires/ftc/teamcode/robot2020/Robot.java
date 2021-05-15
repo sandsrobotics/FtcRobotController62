@@ -125,7 +125,7 @@ public class Robot
         if(robotUsage.visionUsage.useThread()) vision.start();
 
         if(robotUsage.useGrabber && resetGrabberPos) grabber.initGrabberPos();
-        if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs();
+        if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs(grabber.grabberSettings.restPos);
     }
 
     /////////////
