@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.spartronics4915.lib.T265Camera;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.robot2020.GamepadButtons;
 import org.firstinspires.ftc.teamcode.robot2020.Robot;
 import org.firstinspires.ftc.teamcode.robot2020.RobotUsage;
 
+@Disabled
 @Config
 @TeleOp(name = "test positionTracker tracking camera")
 public class Test5 extends LinearOpMode {
