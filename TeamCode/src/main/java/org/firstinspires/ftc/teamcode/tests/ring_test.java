@@ -31,7 +31,8 @@ public class ring_test extends LinearOpMode {
     boolean mm;
 
     /**
-     * This function is executed when this Op Mode is selected from the Driver Station.
+     * This function is executed when this Op Mode is selected from the Driver
+     * Station.
      */
     @Override
     public void runOpMode() {
@@ -122,7 +123,7 @@ public class ring_test extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-        //servo0.setDirection(Servo.Direction.REVERSE);
+        // servo0.setDirection(Servo.Direction.REVERSE);
         servo3.setDirection(DcMotorSimple.Direction.REVERSE);
         servo0.setPosition(0.5);
         servo1.setPosition(1);
@@ -137,7 +138,7 @@ public class ring_test extends LinearOpMode {
         if (spin_power2 < 0) {
             spin_power2 = 0;
         }
-        //motor3.setVelocity(90.0);
+        // motor3.setVelocity(90.0);
         motor3.setPower(spin_power2);
     }
 
@@ -163,13 +164,14 @@ public class ring_test extends LinearOpMode {
      * Describe this function...
      */
     private void data_out() {
-        // where spinRPM is my target speed, 145.6 is the motor's ticks/rev, and 7 is my gear ratio.
-        //Double spinMultiplier = 60 / 145.6 * 5;
+        // where spinRPM is my target speed, 145.6 is the motor's ticks/rev, and 7 is my
+        // gear ratio.
+        // Double spinMultiplier = 60 / 145.6 * 5;
         Double spinMultiplier = 60 / 28.0;
         Double spinSpeed;
         spinSpeed = motor3.getVelocity() * spinMultiplier;
 
-        telemetry.addData("spinSpeed",spinSpeed);
+        telemetry.addData("spinSpeed", spinSpeed);
         telemetry.addData("Spin power", motor3.getPower());
         telemetry.addData("Ramp", motor2.getCurrentPosition());
         telemetry.addData("Sweep", servo3.getPower());

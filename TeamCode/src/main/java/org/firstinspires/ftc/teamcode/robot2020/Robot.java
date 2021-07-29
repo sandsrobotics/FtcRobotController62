@@ -16,15 +16,12 @@ import org.firstinspires.ftc.teamcode.robot2020.persistence.AppDatabase;
 
 import static java.lang.Thread.currentThread;
 
-
 @Config
-public class Robot
-{
+public class Robot {
     ///////////////////
-    //other variables//
+    // other variables//
     ///////////////////
-    //other classes
-    public RobotHardware robotHardware; //stores and configures all motors and servos
+    public RobotHardware robotHardware;
     public Movement movement;
     public Vision vision;
     public Launcher launcher;
@@ -32,7 +29,7 @@ public class Robot
     public PositionTracker positionTracker;
     public Grabber grabber;
 
-    //objects
+    // objects
     protected HardwareMap hardwareMap;
     protected Telemetry telemetry;
     protected FtcDashboard dashboard;
@@ -42,18 +39,25 @@ public class Robot
     protected RobotUsage robotUsage;
     protected RobotSettings robotSettings;
 
-    //other
+    // other
     protected Gamepad gamepad1;
     protected Gamepad gamepad2;
     TelemetryPacket packet = new TelemetryPacket();
-    public static boolean emergencyStop = false;
+    public static boolean emergencyStop = false; // trdgdfg
 
-    Robot(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain) { init(opMode,robotUsage,robotSettingsMain); }
-    Robot(LinearOpMode opMode, RobotUsage robotUsage) { init(opMode, robotUsage, new RobotSettingsMain()); }
-    Robot(LinearOpMode opMode) { init(opMode, new RobotUsage(), new RobotSettingsMain()); }
+    Robot(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain) {
+        init(opMode, robotUsage, robotSettingsMain);
+    }
 
-    private void init(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain)
-    {
+    Robot(LinearOpMode opMode, RobotUsage robotUsage) {
+        init(opMode, robotUsage, new RobotSettingsMain());
+    }
+
+    Robot(LinearOpMode opMode) {
+        init(opMode, new RobotUsage(), new RobotSettingsMain());
+    }
+
+    private void init(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain) {
         this.robotUsage = robotUsage;
         this.robotSettings = robotSettingsMain.robotSettings;
         this.opMode = opMode;
@@ -64,26 +68,39 @@ public class Robot
 
         robotHardware = new RobotHardware(this, robotSettingsMain.hardwareSettings);
 
-        if(robotUsage.positionUsage.usePosition) positionTracker = new PositionTracker(this, robotSettingsMain.positionSettings);
-        if(robotUsage.useDrive) movement = new Movement(this, robotSettingsMain.movementSettings);
-        if(robotUsage.visionUsage.useVision) vision = new Vision(this, robotSettingsMain.visionSettings);
-        if(robotUsage.useLauncher) launcher = new Launcher(this, robotSettingsMain.launcherSettings);
-        if(robotUsage.useComplexMovement) complexMovement = new ComplexMovement(this);
-        if(robotUsage.useGrabber){ grabber = new Grabber(this, robotSettingsMain.grabberSettings);
-        addTelemetry("grabber", " init");}
+        if (robotUsage.positionUsage.usePosition)
+            positionTracker = new PositionTracker(this, robotSettingsMain.positionSettings);
+        if (robotUsage.useDrive)
+            movement = new Movement(this, robotSettingsMain.movementSettings);
+        if (robotUsage.visionUsage.useVision)
+            vision = new Vision(this, robotSettingsMain.visionSettings);
+        if (robotUsage.useLauncher)
+            launcher = new Launcher(this, robotSettingsMain.launcherSettings);
+        if (robotUsage.useComplexMovement)
+            complexMovement = new ComplexMovement(this);
+        if (robotUsage.useGrabber) {
+            grabber = new Grabber(this, robotSettingsMain.grabberSettings);
+            addTelemetry("grabber", " init");
+        }
 
         initHardware();
-        if(robotUsage.useDrive || (robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useEncoders) || robotUsage.useComplexMovement) robotHardware.initDriveMotors();
-        if(robotUsage.useLauncher) robotHardware.initLauncherMotors();
-        if(robotUsage.visionUsage.useVision) vision.initAll();
-        if(robotUsage.useGrabber) robotHardware.initGrabberHardware();
-        if(robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useDistanceSensors) { robotHardware.initUltrasonicSensors(); }
+        if (robotUsage.useDrive || (robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useEncoders)
+                || robotUsage.useComplexMovement)
+            robotHardware.initDriveMotors();
+        if (robotUsage.useLauncher)
+            robotHardware.initLauncherMotors();
+        if (robotUsage.visionUsage.useVision)
+            vision.initAll();
+        if (robotUsage.useGrabber)
+            robotHardware.initGrabberHardware();
+        if (robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useDistanceSensors) {
+            robotHardware.initUltrasonicSensors();
+        }
     }
 
-    void initHardware()
-    {
+    void initHardware() {
         ///////////
-        //sensors//
+        // sensors//
         ///////////
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
@@ -96,66 +113,67 @@ public class Robot
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
-
-        while (!opMode.isStopRequested() && !imu.isGyroCalibrated())
-        {
+        while (!opMode.isStopRequested() && !imu.isGyroCalibrated()) {
             delay(50);
             opMode.idle();
         }
 
         /////////////
-        //dashboard//
+        // dashboard//
         /////////////
-        if(robotSettings.debug_dashboard) dashboard = FtcDashboard.getInstance();
+        if (robotSettings.debug_dashboard)
+            dashboard = FtcDashboard.getInstance();
         startTelemetry();
 
         /////////////
-        //data base//
+        // data base//
         /////////////
         db = Room.databaseBuilder(AppUtil.getDefContext(), AppDatabase.class, robotSettings.dataBaseName).build();
     }
 
-    //------------------My Methods------------------//
+    // ------------------My Methods------------------//
 
-    void start(boolean resetGrabberPos, boolean isAuto)
-    {
+    void start(boolean resetGrabberPos, boolean isAuto) {
         startTelemetry();
-        if(robotUsage.positionUsage.useThread()) positionTracker.start();
-        if(robotUsage.visionUsage.useThread()) vision.start();
+        if (robotUsage.positionUsage.useThread())
+            positionTracker.start();
+        if (robotUsage.visionUsage.useThread())
+            vision.start();
 
-        if(robotUsage.useGrabber && resetGrabberPos) grabber.initGrabberPos();
-        if(!isAuto && robotUsage.useLauncher) launcher.initFrogLegs();
+        if (robotUsage.useGrabber && resetGrabberPos)
+            grabber.initGrabberPos();
+        if (!isAuto && robotUsage.useLauncher)
+            launcher.initFrogLegs();
     }
 
     /////////////
-    //telemetry//
+    // telemetry//
     /////////////
 
-    void startTelemetry()
-    {
-        if(robotSettings.debug_dashboard)
-        {
+    void startTelemetry() {
+        if (robotSettings.debug_dashboard) {
             packet = new TelemetryPacket();
         }
     }
 
-    void addTelemetry(String cap, Object val)
-    {
-        if(robotSettings.debug_dashboard) packet.put(cap, val);
-        if(robotSettings.debug_telemetry) telemetry.addData(cap, val);
+    void addTelemetry(String cap, Object val) {
+        if (robotSettings.debug_dashboard)
+            packet.put(cap, val);
+        if (robotSettings.debug_telemetry)
+            telemetry.addData(cap, val);
     }
 
-    void sendTelemetry()
-    {
-        if(robotSettings.debug_dashboard) dashboard.sendTelemetryPacket(packet);
-        if(robotSettings.debug_telemetry) telemetry.update();
+    void sendTelemetry() {
+        if (robotSettings.debug_dashboard)
+            dashboard.sendTelemetryPacket(packet);
+        if (robotSettings.debug_telemetry)
+            telemetry.update();
     }
 
     ////////////////
-    //calculations//
+    // calculations//
     ////////////////
-    double findAngleError(double currentAngle, double targetAngle)
-    {
+    double findAngleError(double currentAngle, double targetAngle) {
         targetAngle = scaleAngle(targetAngle);
         double angleError = currentAngle - targetAngle;
         if (angleError > 180) {
@@ -168,22 +186,24 @@ public class Robot
 
     double scaleAngle(double angle)// scales an angle to fit in -180 to 180
     {
-        if (angle > 180) { return angle - 360; }
-        if (angle < -180) { return angle + 360; }
+        if (angle > 180) {
+            return angle - 360;
+        }
+        if (angle < -180) {
+            return angle + 360;
+        }
         return angle;
     }
 
-    double getAngleFromXY(double X, double Y)
-    {
-        return Math.atan2(X, Y)*(180 / Math.PI);
+    double getAngleFromXY(double X, double Y) {
+        return Math.atan2(X, Y) * (180 / Math.PI);
     }
 
-    double[] getXYFromAngle(double angle)
-    {
+    double[] getXYFromAngle(double angle) {
         // deg to rad
         angle /= (180 / Math.PI);
 
-        //rad to X,Y
+        // rad to X,Y
         double[] XY = new double[2];
         XY[0] = Math.sin(angle);
         XY[1] = Math.cos(angle);
@@ -195,18 +215,17 @@ public class Robot
     }
 
     /////////
-    //other//
+    // other//
     /////////
-    void delay(long ms){
+    void delay(long ms) {
         long last = System.currentTimeMillis();
-        while(System.currentTimeMillis() - last < ms)
-        {
-            if(stop())break;
+        while (System.currentTimeMillis() - last < ms) {
+            if (stop())
+                break;
         }
     }
 
-    void sleep(long ms)
-    {
+    void sleep(long ms) {
         try {
             currentThread().sleep(ms);
         } catch (InterruptedException e) {
@@ -214,25 +233,56 @@ public class Robot
         }
     }
 
-    boolean stop() { return emergencyStop || gamepad1.back || gamepad2.back || opMode.isStopRequested(); }
+    boolean stop() {
+        return emergencyStop || gamepad1.back || gamepad2.back || opMode.isStopRequested();
+    }
 }
 
-class RobotUsage
-{
+/**
+ * contains markers to turn on and off all the parts of the robot
+ */
+class RobotUsage {
     boolean useDrive, useComplexMovement, useLauncher, useGrabber;
     PositionUsage positionUsage;
     VisionUsage visionUsage;
 
-    RobotUsage()
-    {
+    /**
+     * sets all flags in RobotUsage to true
+     */
+    RobotUsage() {
         setAllToValue(true);
     }
-    RobotUsage(boolean value)
-    {
+
+    /**
+     * sets all flags in RobotUsage to the variable value
+     * 
+     * @param value sets all the flags in RobotUsage to value
+     */
+    RobotUsage(boolean value) {
         setAllToValue(value);
     }
-    RobotUsage(boolean useDrive, boolean useComplexMovement, boolean useLauncher, boolean useGrabber, PositionUsage positionUsage, VisionUsage visionUsage)
-    {
+
+    /**
+     * sets all values in RobotUsage based on there corrisponding variables
+     * 
+     * @param useDrive           controls the wheel motors and encoders and
+     *                           initilizes the movemnt classes
+     * @param useComplexMovement - requires useDrive to be enabled - initilizes the
+     *                           ComplexMovement class that can record and replay
+     *                           movements plus store them in a database
+     * @param useLauncher        contorls the launcher and intake - if you want to
+     *                           use the auto-launch functions you also need to
+     *                           enable useDrive and position tracking from
+     *                           positionUsage
+     * @param useGrabber         contorls the grabber part - if you want to use the
+     *                           auto-drop function(expirimental) you also need to
+     *                           enable useDrive and position tracking from
+     *                           positionUsage
+     * @param positionUsage      controls all the flags related to position tracking
+     * @param visionUsage        controls all the flags related to vision and camera
+     */
+    RobotUsage(boolean useDrive, boolean useComplexMovement, boolean useLauncher, boolean useGrabber,
+            PositionUsage positionUsage, VisionUsage visionUsage) {
         this.useDrive = useDrive;
         this.useComplexMovement = useComplexMovement;
         this.useLauncher = useLauncher;
@@ -241,8 +291,12 @@ class RobotUsage
         this.visionUsage = visionUsage;
     }
 
-    void setAllToValue(boolean value)
-    {
+    /**
+     * sets all flags in RobotUsage to value
+     * 
+     * @param value sets all the variables in RobotUsage to value
+     */
+    void setAllToValue(boolean value) {
         this.useDrive = value;
         this.useComplexMovement = value;
         this.useLauncher = value;
@@ -252,20 +306,22 @@ class RobotUsage
     }
 }
 
-class PositionUsage
-{
+/**
+ * 
+ */
+class PositionUsage {
     boolean usePosition, useEncoders, useDistanceSensors, useCamera, usePositionThread;
 
-    PositionUsage()
-    {
+    PositionUsage() {
         setAllToValue(true);
     }
-    PositionUsage(boolean value)
-    {
+
+    PositionUsage(boolean value) {
         setAllToValue(value);
     }
-    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors, boolean useCamera)
-    {
+
+    PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors,
+            boolean useCamera) {
         this.usePosition = usePosition;
         this.usePositionThread = usePositionThread;
         this.useEncoders = useEncoders;
@@ -273,8 +329,7 @@ class PositionUsage
         this.useCamera = useCamera;
     }
 
-    void setAllToValue(boolean value)
-    {
+    void setAllToValue(boolean value) {
         this.usePosition = value;
         this.usePositionThread = value;
         this.useEncoders = value;
@@ -282,21 +337,28 @@ class PositionUsage
         this.useCamera = value;
     }
 
-    boolean useThread(){return usePosition && usePositionThread;}
-    boolean positionTrackingEnabled(){return usePosition && (useDistanceSensors || useEncoders || useCamera);}
+    boolean useThread() {
+        return usePosition && usePositionThread;
+    }
+
+    boolean positionTrackingEnabled() {
+        return usePosition && (useDistanceSensors || useEncoders || useCamera);
+    }
 }
 
-class VisionUsage
-{
+class VisionUsage {
     boolean useVision, useVuforia, useVuforiaInThread, useTensorFlow, useTensorFlowInTread, useOpenCV;
 
-    VisionUsage(){setAllToValue(true);}
-    VisionUsage(boolean value)
-    {
+    VisionUsage() {
+        setAllToValue(true);
+    }
+
+    VisionUsage(boolean value) {
         setAllToValue(value);
     }
-    VisionUsage(boolean useVision, boolean useVuforia, boolean useVuforiaInThread, boolean useTensorFlow, boolean useTensorFlowInTread, boolean useOpenCV)
-    {
+
+    VisionUsage(boolean useVision, boolean useVuforia, boolean useVuforiaInThread, boolean useTensorFlow,
+            boolean useTensorFlowInTread, boolean useOpenCV) {
         this.useVision = useVision;
         this.useVuforia = useVuforia;
         this.useVuforiaInThread = useVuforiaInThread;
@@ -305,8 +367,7 @@ class VisionUsage
         this.useTensorFlowInTread = useTensorFlowInTread;
     }
 
-    void setAllToValue(boolean value)
-    {
+    void setAllToValue(boolean value) {
         this.useVision = value;
         this.useVuforia = value;
         this.useVuforiaInThread = value;
@@ -315,27 +376,28 @@ class VisionUsage
         this.useTensorFlowInTread = value;
     }
 
-    boolean useThread() { return useVision && useVuforia && (useVuforiaInThread || (useTensorFlow && useTensorFlowInTread)); }
+    boolean useThread() {
+        return useVision && useVuforia && (useVuforiaInThread || (useTensorFlow && useTensorFlowInTread));
+    }
 }
 
-class RobotSettings
-{
+class RobotSettings {
     /////////////
-    //user data//
+    // user data//
     /////////////
-    //debug
+    // debug
     protected boolean debug_telemetry = true;
     protected boolean debug_dashboard = true; // turn this to false during competition
     protected boolean debug_methods = true;
 
-    //database
+    // database
     protected String dataBaseName = "FIRST_INSPIRE_2020";
 
-    RobotSettings(){}
+    RobotSettings() {
+    }
 }
 
-class RobotSettingsMain
-{
+class RobotSettingsMain {
     protected RobotSettings robotSettings;
     protected GrabberSettings grabberSettings;
     protected LauncherSettings launcherSettings;
@@ -344,8 +406,7 @@ class RobotSettingsMain
     protected PositionSettings positionSettings;
     protected VisionSettings visionSettings;
 
-    RobotSettingsMain()
-    {
+    RobotSettingsMain() {
         robotSettings = new RobotSettings();
         grabberSettings = new GrabberSettings();
         launcherSettings = new LauncherSettings();
@@ -354,8 +415,10 @@ class RobotSettingsMain
         positionSettings = new PositionSettings();
         visionSettings = new VisionSettings();
     }
-    RobotSettingsMain(RobotSettings robotSettings, GrabberSettings grabberSettings, LauncherSettings launcherSettings, HardwareSettings hardwareSettings, MovementSettings movementSettings, PositionSettings positionSettings, VisionSettings visionSettings)
-    {
+
+    RobotSettingsMain(RobotSettings robotSettings, GrabberSettings grabberSettings, LauncherSettings launcherSettings,
+            HardwareSettings hardwareSettings, MovementSettings movementSettings, PositionSettings positionSettings,
+            VisionSettings visionSettings) {
         this.robotSettings = robotSettings;
         this.grabberSettings = grabberSettings;
         this.launcherSettings = launcherSettings;

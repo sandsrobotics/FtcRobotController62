@@ -10,8 +10,7 @@ import org.firstinspires.ftc.teamcode.robot2020.persistence.Movement.MovementEnt
 import java.util.List;
 
 @Dao
-public interface RobotPositionEntityDAO
-{
+public interface RobotPositionEntityDAO {
     @Insert
     void insertAll(RobotPositionEntity... entities);
 

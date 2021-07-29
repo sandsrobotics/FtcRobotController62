@@ -6,8 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "PositionTracker")
-public class RobotPositionEntity
-{
+public class RobotPositionEntity {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
@@ -25,10 +24,10 @@ public class RobotPositionEntity
     public double accuracy;
 
     @Ignore
-    public RobotPositionEntity() { }
+    public RobotPositionEntity() {
+    }
 
-    public RobotPositionEntity(int runNumber, double posX, double posY, double rotation, double accuracy)
-    {
+    public RobotPositionEntity(int runNumber, double posX, double posY, double rotation, double accuracy) {
         this.runNumber = runNumber;
         this.entryMs = System.currentTimeMillis();
         this.posX = posX;

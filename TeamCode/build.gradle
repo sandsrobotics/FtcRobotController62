@@ -32,3 +32,9 @@ dependencies {
 }
 
 apply from: 'build.release.gradle'
+
+android {
+    androidResources {
+        noCompress 'tflite'
+    }
+}

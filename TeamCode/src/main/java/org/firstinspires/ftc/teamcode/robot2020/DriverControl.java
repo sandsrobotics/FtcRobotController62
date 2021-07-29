@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Config
 @TeleOp(name = "driver control v2")
-public class DriverControl extends LinearOpMode
-{
+public class DriverControl extends LinearOpMode {
     Robot robot;
     GamepadButtonManager fullAutoLaunchButton;
     GamepadButtonManager semiAutoLaunchButton;
@@ -24,15 +23,13 @@ public class DriverControl extends LinearOpMode
     double slowSpeed = 0.3;
 
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         RobotUsage ru = new RobotUsage();
         ru.visionUsage.useVuforia = false;
         ru.useComplexMovement = false;
-        //ru.visionUsage.useTensorFlow = false;
+        // ru.visionUsage.useTensorFlow = false;
 
         robot = new Robot(this, ru);
-
 
         waitForStart();
 
@@ -49,39 +46,42 @@ public class DriverControl extends LinearOpMode
 
         robot.start(true, false);
 
-        while (opModeIsActive())
-        {
+        while (opModeIsActive()) {
             robot.startTelemetry();
 
             robot.movement.moveForTeleOp(gamepad1, true);
             robot.grabber.runForTeleOp(gamepad1, true);
-            robot.launcher.runForTeleOp(gamepad2,true);
+            robot.launcher.runForTeleOp(gamepad2, true);
             robot.positionTracker.drawAllPositions();
 
-            if(fullAutoLaunchButton.getButtonHeld())
+            if (fullAutoLaunchButton.getButtonHeld())
                 robot.launcher.autoLaunchDiskFromLine();
-            else if(semiAutoLaunchButton.getButtonHeld()) {
+            else if (semiAutoLaunchButton.getButtonHeld()) {
                 robot.launcher.setRPM(robot.launcher.launcherSettings.autoLaunchRPM);
                 robot.launcher.goToLine();
                 robot.launcher.shutdownWheel = false;
-            }
-            else if(pointToZero.getButtonHeld())
-                robot.movement.turnToAngle(0 , robot.movement.movementSettings.finalPosSettings.toRotAngleSettings());
-            else if(wobbleGaolDrop.getButtonHeld())
+            } else if (pointToZero.getButtonHeld())
+                robot.movement.turnToAngle(0, robot.movement.movementSettings.finalPosSettings.toRotAngleSettings());
+            else if (wobbleGaolDrop.getButtonHeld())
                 robot.grabber.autoDrop();
-            else if(autoLaunchPowerShot.getButtonHeld())
+            else if (autoLaunchPowerShot.getButtonHeld())
                 robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPos);
-            else if(autoLaunchPowerShot2.getButtonHeld())
+            else if (autoLaunchPowerShot2.getButtonHeld())
                 robot.launcher.autoLaunchPowerShots(robot.launcher.launcherSettings.powerShotPosV2);
 
-            if(RPMChange.getButtonPressed())
-            {
-              if(robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM){robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;}
-              else{robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;}
+            if (RPMChange.getButtonPressed()) {
+                if (robot.launcher.targetWheelRpm == robot.launcher.launcherSettings.autoLaunchRPM) {
+                    robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.powerShotRPM;
+                } else {
+                    robot.launcher.targetWheelRpm = robot.launcher.launcherSettings.autoLaunchRPM;
+                }
             }
-            if(resetAngle.getButtonPressed()) robot.positionTracker.resetAngle();
-            if(speedToggle.getButtonHeld()) robot.movement.setSpeedMultiplier(slowSpeed);
-            else robot.movement.setSpeedMultiplier(1);
+            if (resetAngle.getButtonPressed())
+                robot.positionTracker.resetAngle();
+            if (speedToggle.getButtonHeld())
+                robot.movement.setSpeedMultiplier(slowSpeed);
+            else
+                robot.movement.setSpeedMultiplier(1);
 
             float[] dist = robot.robotHardware.getDistancesList(robot.robotHardware.distSensors);
             robot.addTelemetry("dist 1", dist[0]);

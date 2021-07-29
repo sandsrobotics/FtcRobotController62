@@ -11,150 +11,159 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 @Config
 public class Launcher {
     ///////////////////
-    //other variables//
+    // other variables//
     ///////////////////
-    //servo and motor
+    // servo and motor
     double spinMultiplier;
 
-    //calibration
+    // calibration
     AllCalibrationDataPoints calibrationData;
 
-    //other
+    // other
     boolean shutdownWheel = true;
     boolean gateOpen = false;
     boolean runWheelForward = false;
     float intakeMotorPower = 0;
-    int frogLegPos = 0; //-1 = stowed, 0 = rest, 1 = ready, 2 = down
+    int frogLegPos = 0; // -1 = stowed, 0 = rest, 1 = ready, 2 = down
     int lastfrogLegPos = 0;
     double targetWheelRpm;
     Robot robot;
     LauncherSettings launcherSettings;
 
-    Launcher(Robot robot)
-    {
+    Launcher(Robot robot) {
         launcherSettings = new LauncherSettings();
         this.robot = robot;
         initData();
     }
 
-    Launcher(Robot robot, LauncherSettings launcherSettings)
-    {
+    Launcher(Robot robot, LauncherSettings launcherSettings) {
         this.launcherSettings = launcherSettings;
         this.robot = robot;
         initData();
     }
 
-    void initData()
-    {
+    void initData() {
         spinMultiplier = 60 / launcherSettings.ticksPerRev * launcherSettings.gearRatio;
         targetWheelRpm = launcherSettings.startRPM;
-        calibrationData = AllCalibrationDataPoints.setCalibrationDataPoints(AppUtil.getDefContext(), launcherSettings.calibrationFileName);
+        calibrationData = AllCalibrationDataPoints.setCalibrationDataPoints(AppUtil.getDefContext(),
+                launcherSettings.calibrationFileName);
     }
 
-
     ///////////////////////////
-    //launcher opmode control//
+    // launcher opmode control//
     ///////////////////////////
-    void telemetryDataOut()
-    {
-        if(shutdownWheel) robot.addTelemetry("Mode: ", "Run on trigger");
-        else robot.addTelemetry("Mode: ", "Run using RPM");
+    void telemetryDataOut() {
+        if (shutdownWheel)
+            robot.addTelemetry("Mode: ", "Run on trigger");
+        else
+            robot.addTelemetry("Mode: ", "Run using RPM");
         robot.addTelemetry("RPM", getPRM());
         robot.addTelemetry("Set RPM", targetWheelRpm);
     }
 
-    void setLauncherServos(Gamepad gamepad)
-    {
+    void setLauncherServos(Gamepad gamepad) {
 
-        if(launcherSettings.launchButton.getButtonHeld(gamepad,launcherSettings.buttonHoldTime)) autoLaunch();
-        else if(launcherSettings.launchButton.getButtonReleased(gamepad)) moveLaunchServo();
+        if (launcherSettings.launchButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime))
+            autoLaunch();
+        else if (launcherSettings.launchButton.getButtonReleased(gamepad))
+            moveLaunchServo();
 
-        if(launcherSettings.gateButton.getButtonPressed(gamepad))
-        {
-            if(gateOpen) { closeGateServo(); }
-            else { openGateServo(0); }
+        if (launcherSettings.gateButton.getButtonPressed(gamepad)) {
+            if (gateOpen) {
+                closeGateServo();
+            } else {
+                openGateServo(0);
+            }
         }
     }
 
-    void setLauncherWheelMotor(Gamepad gamepad)
-    {
-        //inputs
-        if(launcherSettings.revDecreaseButton.getButtonPressed(gamepad) || launcherSettings.revDecreaseButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime))
-        {
+    void setLauncherWheelMotor(Gamepad gamepad) {
+        // inputs
+        if (launcherSettings.revDecreaseButton.getButtonPressed(gamepad)
+                || launcherSettings.revDecreaseButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime)) {
             targetWheelRpm -= launcherSettings.RPMIncrements;
-            if(targetWheelRpm < 0) targetWheelRpm = 0;
+            if (targetWheelRpm < 0)
+                targetWheelRpm = 0;
         }
 
-        if(launcherSettings.revIncreaseButton.getButtonPressed(gamepad) || launcherSettings.revIncreaseButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime))
-        {
+        if (launcherSettings.revIncreaseButton.getButtonPressed(gamepad)
+                || launcherSettings.revIncreaseButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime)) {
             targetWheelRpm += launcherSettings.RPMIncrements;
-            if(targetWheelRpm > launcherSettings.maxRPM) targetWheelRpm = launcherSettings.maxRPM;
+            if (targetWheelRpm > launcherSettings.maxRPM)
+                targetWheelRpm = launcherSettings.maxRPM;
         }
 
-        if(launcherSettings.revModeButton.getButtonPressed(gamepad)) {
-            shutdownWheel =!shutdownWheel;
-            if(shutdownWheel) closeGateServo();
+        if (launcherSettings.revModeButton.getButtonPressed(gamepad)) {
+            shutdownWheel = !shutdownWheel;
+            if (shutdownWheel)
+                closeGateServo();
         }
 
-        //setting motor
-        if (shutdownWheel) robot.robotHardware.launcherWheelMotor.setPower(0);//launcherSettings.revPowerSlide.getSliderValue(gamepad));
-        else setRPM();
+        // setting motor
+        if (shutdownWheel)
+            robot.robotHardware.launcherWheelMotor.setPower(0);// launcherSettings.revPowerSlide.getSliderValue(gamepad));
+        else
+            setRPM();
     }
 
-    void setLauncherIntakeMotor(Gamepad gamepad)
-    {
+    void setLauncherIntakeMotor(Gamepad gamepad) {
         intakeMotorPower = 0;
 
-        if(launcherSettings.intakeInButton.getButtonPressed(gamepad)) runWheelForward = !runWheelForward;
+        if (launcherSettings.intakeInButton.getButtonPressed(gamepad))
+            runWheelForward = !runWheelForward;
 
-        else if(launcherSettings.intakeOutSlider.getButtonHeld(gamepad)){
+        else if (launcherSettings.intakeOutSlider.getButtonHeld(gamepad)) {
             runWheelForward = false;
             intakeMotorPower = -launcherSettings.intakeOutSlider.getSliderValue(gamepad);
-        }
-        else if(runWheelForward){
-            if(frogLegPos == -1) unstowFrogLegs(true);
+        } else if (runWheelForward) {
+            if (frogLegPos == -1)
+                unstowFrogLegs(true);
             intakeMotorPower = 1;
         }
 
         robot.robotHardware.launcherIntakeMotor.setPower(intakeMotorPower);
     }
 
-    void setFrogLegServos(Gamepad gamepad){
-        if(launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
-            if(frogLegPos != 0) frogLegPos = 0;
-            else frogLegPos = 2;
+    void setFrogLegServos(Gamepad gamepad) {
+        if (launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
+            if (frogLegPos != 0)
+                frogLegPos = 0;
+            else
+                frogLegPos = 2;
             setFrogLegPos(false);
-        }
-        else if(launcherSettings.frogLegToggleButton.getButtonPressed(gamepad)) {
-            if(frogLegPos != 2) frogLegPos = 2;
-            else frogLegPos = 1;
+        } else if (launcherSettings.frogLegToggleButton.getButtonPressed(gamepad)) {
+            if (frogLegPos != 2)
+                frogLegPos = 2;
+            else
+                frogLegPos = 1;
             setFrogLegPos(false);
         }
     }
 
-    void runForTeleOp(Gamepad gamepad, boolean telemetry)
-    {
+    void runForTeleOp(Gamepad gamepad, boolean telemetry) {
         setLauncherServos(gamepad);
         setLauncherWheelMotor(gamepad);
         setLauncherIntakeMotor(gamepad);
         setFrogLegServos(gamepad);
-        if(telemetry)telemetryDataOut();
+        if (telemetry)
+            telemetryDataOut();
     }
 
     /////////////////////////////////////
-    //auto launcher control - main goal//
+    // auto launcher control - main goal//
     /////////////////////////////////////
-    void autonomousLaunchDisk()
-    {
+    void autonomousLaunchDisk() {
         double RPM = calibrationData.getTargetRPMAtDistance(getDistanceToGoal(true), 3);
-        if(RPM == -1) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "unable to get RPM");
-        else if(robot.movement == null) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
-        else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
-        else
-        {
+        if (RPM == -1)
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "unable to get RPM");
+        else if (robot.movement == null)
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
+        else if (!robot.robotUsage.positionUsage.positionTrackingEnabled())
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
+        else {
             setRPM(RPM);
             goToShootingPos();
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 waitForRPMInTolerance(1000);
                 autoLaunch();
             }
@@ -162,17 +171,17 @@ public class Launcher {
         shutdownWheel = true;
     }
 
-    void autoLaunchDiskFromLine()
-    {
-        if(!robot.robotUsage.useDrive) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
-        else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
-        else
-        {
+    void autoLaunchDiskFromLine() {
+        if (!robot.robotUsage.useDrive)
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
+        else if (!robot.robotUsage.positionUsage.positionTrackingEnabled())
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
+        else {
             openGateServoNoDelay();
             setRPM(launcherSettings.autoLaunchRPM);
             goToLine();
 
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 waitForRPMInTolerance(1000);
                 autoLaunch();
             }
@@ -183,49 +192,55 @@ public class Launcher {
 
     }
 
-    void goToShootingPos()
-    {
-        if(!robot.robotUsage.useDrive) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
-        else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
-        else
-        {
-            if (robot.positionTracker.currentPosition.Y > launcherSettings.minLaunchDistance) robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(0,  launcherSettings.minLaunchDistance, getAngleToPointToPosition()), robot.movement.movementSettings.finalPosSettings);
-            else robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(0, 0, getAngleToPointToPosition()), robot.movement.movementSettings.finalPosSettings);
+    void goToShootingPos() {
+        if (!robot.robotUsage.useDrive)
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
+        else if (!robot.robotUsage.positionUsage.positionTrackingEnabled())
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
+        else {
+            if (robot.positionTracker.currentPosition.Y > launcherSettings.minLaunchDistance)
+                robot.movement.moveToPosition(robot.positionTracker.getPositionWithOffset(0,
+                        launcherSettings.minLaunchDistance, getAngleToPointToPosition()),
+                        robot.movement.movementSettings.finalPosSettings);
+            else
+                robot.movement.moveToPosition(
+                        robot.positionTracker.getPositionWithOffset(0, 0, getAngleToPointToPosition()),
+                        robot.movement.movementSettings.finalPosSettings);
         }
     }
 
     void goToLine() {
-        if(frogLegPos != -1){
+        if (frogLegPos != -1) {
             stowFrogLegs(false);
         }
         robot.movement.moveToPosition(launcherSettings.autoLaunchPos, robot.movement.movementSettings.finalPosSettings);
     }
 
     //////////////////////////////////////
-    //auto launcher control - power shot//
+    // auto launcher control - power shot//
     //////////////////////////////////////
-    void powerShotStart(){
+    void powerShotStart() {
         openGateServoNoDelay();
-        if(frogLegPos != -1){
+        if (frogLegPos != -1) {
             stowFrogLegs(false);
         }
         setRPM(launcherSettings.powerShotRPM);
     }
 
-    void powerShotEnd(){
+    void powerShotEnd() {
         targetWheelRpm = launcherSettings.autoLaunchRPM;
         shutdownWheel = true;
         closeGateServo();
     }
 
-    void autoLaunchPowerShots(Position[] positions)
-    {
-        if(!robot.robotUsage.useDrive) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
-        else if(!robot.robotUsage.positionUsage.positionTrackingEnabled()) robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
-        else
-        {
+    void autoLaunchPowerShots(Position[] positions) {
+        if (!robot.robotUsage.useDrive)
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
+        else if (!robot.robotUsage.positionUsage.positionTrackingEnabled())
+            robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to track position");
+        else {
             powerShotStart();
-            for(int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++) {
                 robot.movement.moveToPosition(positions[i], robot.movement.movementSettings.finalPosSettings);
                 waitForRPMInTolerance(1000);
                 autoLaunch();
@@ -235,247 +250,249 @@ public class Launcher {
     }
 
     ////////////////
-    //calculations//
+    // calculations//
     ////////////////
-    double getAngleToPointToPosition(double xPos, double yPos, double angleOffset, boolean useMinLaunchDis)
-    {
-        if(robot.robotUsage.positionUsage.positionTrackingEnabled())
-        {
+    double getAngleToPointToPosition(double xPos, double yPos, double angleOffset, boolean useMinLaunchDis) {
+        if (robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             double XDiff = xPos - robot.positionTracker.currentPosition.X;
             double YDiff;
             if (useMinLaunchDis && robot.positionTracker.currentPosition.Y > launcherSettings.minLaunchDistance)
                 YDiff = -launcherSettings.minLaunchDistance;
-            else YDiff = yPos - robot.positionTracker.currentPosition.Y;
+            else
+                YDiff = yPos - robot.positionTracker.currentPosition.Y;
 
             return robot.scaleAngle(Math.toDegrees(Math.atan(XDiff / YDiff)) + angleOffset);
         }
         return 0;
     }
 
-    double getAngleToPointToPosition()
-    {
-        return getAngleToPointToPosition(0,0,0, true);
+    double getAngleToPointToPosition() {
+        return getAngleToPointToPosition(0, 0, 0, true);
     }
 
-    boolean isRPMInTolerance(double targetWheelRpm, double RPMTolerance) { return Math.abs(getPRM() - targetWheelRpm) <= RPMTolerance; }
+    boolean isRPMInTolerance(double targetWheelRpm, double RPMTolerance) {
+        return Math.abs(getPRM() - targetWheelRpm) <= RPMTolerance;
+    }
 
-    boolean isRPMInTolerance() { return isRPMInTolerance(targetWheelRpm, launcherSettings.RPMTolerance); }
+    boolean isRPMInTolerance() {
+        return isRPMInTolerance(targetWheelRpm, launcherSettings.RPMTolerance);
+    }
 
-    double getPRM() { return  robot.robotHardware.launcherWheelMotor.getVelocity() * spinMultiplier; }
+    double getPRM() {
+        return robot.robotHardware.launcherWheelMotor.getVelocity() * spinMultiplier;
+    }
 
-    double getDistanceToGoal(boolean useMinLaunchDistance)
-    {
-        if(robot.robotUsage.positionUsage.positionTrackingEnabled())
-        {
+    double getDistanceToGoal(boolean useMinLaunchDistance) {
+        if (robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             if (robot.positionTracker.currentPosition.Y > launcherSettings.minLaunchDistance || !useMinLaunchDistance)
-                return Math.sqrt(Math.pow(robot.positionTracker.currentPosition.X, 2) + Math.pow(robot.positionTracker.currentPosition.Y, 2));
-            return Math.sqrt(Math.pow(robot.positionTracker.currentPosition.X, 2) + Math.pow(launcherSettings.minLaunchDistance, 2));
+                return Math.sqrt(Math.pow(robot.positionTracker.currentPosition.X, 2)
+                        + Math.pow(robot.positionTracker.currentPosition.Y, 2));
+            return Math.sqrt(Math.pow(robot.positionTracker.currentPosition.X, 2)
+                    + Math.pow(launcherSettings.minLaunchDistance, 2));
         }
-        if(robot.robotSettings.debug_methods) robot.addTelemetry("error in Launcher.getDistanceToGoal: ", "robot cannot find distance because it does not know its positionTracker");
+        if (robot.robotSettings.debug_methods)
+            robot.addTelemetry("error in Launcher.getDistanceToGoal: ",
+                    "robot cannot find distance because it does not know its positionTracker");
         return -1;
     }
 
     /////////
-    //other//
+    // other//
     /////////
-    void setRPM(double RPM)
-    {
+    void setRPM(double RPM) {
         targetWheelRpm = RPM;
         robot.robotHardware.launcherWheelMotor.setVelocity(RPM / spinMultiplier);
     }
 
-    void setRPM()
-    {
+    void setRPM() {
         setRPM(targetWheelRpm);
     }
 
-    void waitForRPMInTolerance(long maxMs, double targetWheelRpm, double RPMTolerance)
-    {
+    void waitForRPMInTolerance(long maxMs, double targetWheelRpm, double RPMTolerance) {
         long startTime = System.currentTimeMillis();
-        while(!robot.stop() && System.currentTimeMillis() - startTime < maxMs)
-        {
-            if(isRPMInTolerance(targetWheelRpm, RPMTolerance)) break;
+        while (!robot.stop() && System.currentTimeMillis() - startTime < maxMs) {
+            if (isRPMInTolerance(targetWheelRpm, RPMTolerance))
+                break;
         }
     }
 
-    void waitForRPMInTolerance(long maxMs)
-    {
+    void waitForRPMInTolerance(long maxMs) {
         waitForRPMInTolerance(maxMs, targetWheelRpm, launcherSettings.RPMTolerance);
     }
 
-    void moveLaunchServo(long actuatorTime)
-    {
-        if(frogLegPos == 0) setFrogLegPos(2, false);
+    void moveLaunchServo(long actuatorTime) {
+        if (frogLegPos == 0)
+            setFrogLegPos(2, false);
         robot.robotHardware.launcherLaunchServo.setPosition(launcherSettings.launcherServoLaunchAngle);
         robot.delay(actuatorTime);
         robot.robotHardware.launcherLaunchServo.setPosition(launcherSettings.launcherServoRestAngle);
     }
 
-    void openGateServo(long actuatorTime)
-    {
+    void openGateServo(long actuatorTime) {
         gateOpen = true;
         robot.robotHardware.launcherGateServo.setPosition(launcherSettings.gateServoLaunchAngle);
         robot.delay(actuatorTime);
     }
 
-    void openGateServo(){openGateServo(launcherSettings.gateServoMoveTime);}
-    void openGateServoNoDelay(){openGateServo(0);}
+    void openGateServo() {
+        openGateServo(launcherSettings.gateServoMoveTime);
+    }
 
-    void closeGateServo()
-    {
+    void openGateServoNoDelay() {
+        openGateServo(0);
+    }
+
+    void closeGateServo() {
         robot.robotHardware.launcherGateServo.setPosition(launcherSettings.gateServoRestAngle);
         gateOpen = false;
     }
 
-    void moveLaunchServo()
-    {
+    void moveLaunchServo() {
         moveLaunchServo(launcherSettings.launcherServoMoveTime);
     }
 
-    void autoLaunch()
-    {
-        if(isRPMInTolerance())
-        {
-            if(!gateOpen) openGateServo();
+    void autoLaunch() {
+        if (isRPMInTolerance()) {
+            if (!gateOpen)
+                openGateServo();
             moveLaunchServo();
             robot.delay(launcherSettings.launcherServoMoveTime);
         }
     }
 
     /////////////
-    //frog legs//
+    // frog legs//
     /////////////
-    void setFrogLegPos(int pos, boolean delayBetween){
-        if(pos >= 0 && lastfrogLegPos != pos) {
-            if (frogLegPos < 0) unstowFrogLegs(true);
+    void setFrogLegPos(int pos, boolean delayBetween) {
+        if (pos >= 0 && lastfrogLegPos != pos) {
+            if (frogLegPos < 0)
+                unstowFrogLegs(true);
             robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[pos][0]);
-            if (delayBetween) robot.delay(launcherSettings.delayBetweenFrogLegs);
+            if (delayBetween)
+                robot.delay(launcherSettings.delayBetweenFrogLegs);
             robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[pos][1]);
             frogLegPos = pos;
             lastfrogLegPos = pos;
         }
     }
 
-    void setFrogLegPos(boolean delayBetween){
+    void setFrogLegPos(boolean delayBetween) {
         setFrogLegPos(frogLegPos, delayBetween);
     }
 
-    void initFrogLegs(){
-        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+    void initFrogLegs() {
+        if (robot.robotUsage.useGrabber)
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.FrogLegPos[0][0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.FrogLegPos[0][1]);
         robot.delay(launcherSettings.timeToOpenFrogLegs);
-        if(robot.robotUsage.useGrabber) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
+        if (robot.robotUsage.useGrabber)
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.horizontalPos, false);
         frogLegPos = 0;
     }
 
-    void unstowFrogLegs(boolean useDelay){
-        if(robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor.getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+    void unstowFrogLegs(boolean useDelay) {
+        if (robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor
+                .getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos)
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.stowPos[0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.stowPos[1]);
-        if(useDelay) robot.delay(launcherSettings.timeToOpenFrogLegs);
+        if (useDelay)
+            robot.delay(launcherSettings.timeToOpenFrogLegs);
         frogLegPos = 0;
     }
 
-    void stowFrogLegs(boolean useDelay){
-        if(robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor.getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos) robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
+    void stowFrogLegs(boolean useDelay) {
+        if (robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor
+                .getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos)
+            robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
         robot.robotHardware.launcherFrogArmLeft.setPosition(launcherSettings.stowPos[0]);
         robot.delay(launcherSettings.delayBetweenFrogLegs);
         robot.robotHardware.launcherFrogArmRight.setPosition(launcherSettings.stowPos[1]);
-        if(useDelay) robot.delay(launcherSettings.timeToCloseFrogLegs);
+        if (useDelay)
+            robot.delay(launcherSettings.timeToCloseFrogLegs);
         frogLegPos = -1;
     }
 
-
 }// class end
 
-class LauncherSettings
-{
+class LauncherSettings {
     //////////////////
-    //user variables//
+    // user variables//
     //////////////////
-    //controls
-    //rev
+    // controls
+    // rev
     GamepadButtonManager revIncreaseButton = new GamepadButtonManager(GamepadButtons.B);
     GamepadButtonManager revDecreaseButton = new GamepadButtonManager(GamepadButtons.X);
-    //GamepadButtonManager revPowerSlide = new GamepadButtonManager(GamepadButtons.leftTRIGGER);
+    // GamepadButtonManager revPowerSlide = new
+    // GamepadButtonManager(GamepadButtons.leftTRIGGER);
     GamepadButtonManager revModeButton = new GamepadButtonManager(GamepadButtons.Y);
-    //launch
+    // launch
     GamepadButtonManager launchButton = new GamepadButtonManager(GamepadButtons.A);
     GamepadButtonManager gateButton = new GamepadButtonManager(GamepadButtons.dpadDOWN);
-    //intake
+    // intake
     GamepadButtonManager intakeInButton = new GamepadButtonManager(GamepadButtons.rightBUMPER);
     GamepadButtonManager intakeOutSlider = new GamepadButtonManager(GamepadButtons.rightTRIGGER);
-    //frog Leg
+    // frog Leg
     GamepadButtonManager frogLegStowButton = new GamepadButtonManager(GamepadButtons.B);
     GamepadButtonManager frogLegToggleButton = new GamepadButtonManager(GamepadButtons.X);
 
     int buttonHoldTime = 500;
 
-    //motor config
+    // motor config
     double ticksPerRev = 28;
     double gearRatio = 1;
     double maxRPM = 6000;
 
-    //launcher servo
+    // launcher servo
     double launcherServoRestAngle = 0;
     double launcherServoLaunchAngle = 0.8;
     int launcherServoMoveTime = 200;
 
-    //gate servo
+    // gate servo
     double gateServoRestAngle = 0;
     double gateServoLaunchAngle = 1;
     int gateServoMoveTime = 325;
 
-    //calibration data
-    protected String calibrationFileName =  "LauncherConfig.json";
+    // calibration data
+    protected String calibrationFileName = "LauncherConfig.json";
 
-    //base data
-    double minLaunchDistance = -64; //this is how far the robot has to be from goal to launch - IN INCHES!!!
+    // base data
+    double minLaunchDistance = -64; // this is how far the robot has to be from goal to launch - IN INCHES!!!
 
-    //auto launch
-    Position autoLaunchPos = new Position(17, minLaunchDistance, -12); //this is how far the robot has to be from goal to launch - IN INCHES!!!
-    double autoLaunchRPM = 3600; //RPM to launch from line
+    // auto launch
+    Position autoLaunchPos = new Position(17, minLaunchDistance, -12); // this is how far the robot has to be from goal
+                                                                       // to launch - IN INCHES!!!
+    double autoLaunchRPM = 3600; // RPM to launch from line
 
-    //power shots
-    double powerShotRPM = 3250; //RPM to launch from power shots
-    Position[] powerShotPos = {
-        new Position(18, minLaunchDistance, 0),
-        new Position(25.5, minLaunchDistance, 0),
-        new Position(33, minLaunchDistance, 0)
-    };
+    // power shots
+    double powerShotRPM = 3250; // RPM to launch from power shots
+    Position[] powerShotPos = { new Position(18, minLaunchDistance, 0), new Position(25.5, minLaunchDistance, 0),
+            new Position(33, minLaunchDistance, 0) };
 
-    //power shot v2
-    Position[] powerShotPosV2 = {
-        new Position(24, minLaunchDistance, -7),
-        new Position(24, minLaunchDistance, 0.5),
-        new Position(24, minLaunchDistance, 7)
-    };
+    // power shot v2
+    Position[] powerShotPosV2 = { new Position(24, minLaunchDistance, -7), new Position(24, minLaunchDistance, 0.5),
+            new Position(24, minLaunchDistance, 7) };
 
-    //frog legs
-    double[][] FrogLegPos = {
-    {.5,.5},
-    {.7,.7},
-    {.9,.9}};
-    double[] stowPos = {0,0};
+    // frog legs
+    double[][] FrogLegPos = { { .5, .5 }, { .7, .7 }, { .9, .9 } };
+    double[] stowPos = { 0, 0 };
     int delayBetweenFrogLegs = 30;
     int timeToOpenFrogLegs = 200;
     int timeToCloseFrogLegs = 100;
 
-    //other
+    // other
     double startRPM = autoLaunchRPM;
     double RPMIncrements = 0;
     double RPMTolerance = 150;
 
-    LauncherSettings(){}
+    LauncherSettings() {
+    }
 }
 
-
-
-class AllCalibrationDataPoints
-{
+class AllCalibrationDataPoints {
     CalibrationDataPoint[] calibrationDataPoints;
 
     public CalibrationDataPoint[] getCalibrationDataPoints() {
@@ -486,23 +503,19 @@ class AllCalibrationDataPoints
         this.calibrationDataPoints = calibrationDataPoints;
     }
 
-    public static AllCalibrationDataPoints setCalibrationDataPoints(Context context, String fileName)
-    {
+    public static AllCalibrationDataPoints setCalibrationDataPoints(Context context, String fileName) {
         Gson gson = new Gson();
         return gson.fromJson(FileManager.readFromFile(fileName, context), AllCalibrationDataPoints.class);
     }
 
-    public int getTargetRPMAtDistance(double distance, int goalNum)
-    {
+    public int getTargetRPMAtDistance(double distance, int goalNum) {
         int row = -1;
         goalNum--;
-        if (calibrationDataPoints != null && goalNum >= 0 && goalNum <=  2)
-        {
-            for(int i = 0; i < calibrationDataPoints.length; i++)
-            {
-                if(calibrationDataPoints[i].distance == distance) return calibrationDataPoints[i].goalRPMS[goalNum];
-                else if(calibrationDataPoints[i].distance > distance)
-                {
+        if (calibrationDataPoints != null && goalNum >= 0 && goalNum <= 2) {
+            for (int i = 0; i < calibrationDataPoints.length; i++) {
+                if (calibrationDataPoints[i].distance == distance)
+                    return calibrationDataPoints[i].goalRPMS[goalNum];
+                else if (calibrationDataPoints[i].distance > distance) {
                     row = i;
                     break;
                 }
@@ -513,12 +526,11 @@ class AllCalibrationDataPoints
             CalibrationDataPoint cdp;
             CalibrationDataPoint cdpPrevious;
 
-            if(row == -1) {
+            if (row == -1) {
                 cdp = calibrationDataPoints[calibrationDataPoints.length - 1];
                 cdpPrevious = calibrationDataPoints[calibrationDataPoints.length - 2];
-            }
-            else {
-                 cdp = calibrationDataPoints[row];
+            } else {
+                cdp = calibrationDataPoints[row];
 
                 if (row == 0) {
                     cdpPrevious = calibrationDataPoints[row + 1];
@@ -526,15 +538,15 @@ class AllCalibrationDataPoints
                     cdpPrevious = calibrationDataPoints[row - 1];
                 }
             }
-            RPMPerInch = (cdp.goalRPMS[goalNum] - cdpPrevious.goalRPMS[goalNum]) / (cdp.distance - cdpPrevious.distance);
-            b = cdp.goalRPMS[goalNum] - (cdp.distance*RPMPerInch);
-            return (int)((RPMPerInch * distance) + b);
+            RPMPerInch = (cdp.goalRPMS[goalNum] - cdpPrevious.goalRPMS[goalNum])
+                    / (cdp.distance - cdpPrevious.distance);
+            b = cdp.goalRPMS[goalNum] - (cdp.distance * RPMPerInch);
+            return (int) ((RPMPerInch * distance) + b);
         }
         return -1;
     }
 
-    class CalibrationDataPoint
-    {
+    class CalibrationDataPoint {
         double distance;
         int[] goalRPMS;
 

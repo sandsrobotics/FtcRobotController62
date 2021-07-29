@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "Movement")
 public class MovementEntity {
 
-    @PrimaryKey (autoGenerate = true)
+    @PrimaryKey(autoGenerate = true)
     public int id;
 
     @ColumnInfo(name = "name")
@@ -19,7 +19,8 @@ public class MovementEntity {
     public float motor_tick;
 
     @Ignore
-    public MovementEntity() { }
+    public MovementEntity() {
+    }
 
     public MovementEntity(String name, int motor_id, float motor_tick) {
         this.name = name;
