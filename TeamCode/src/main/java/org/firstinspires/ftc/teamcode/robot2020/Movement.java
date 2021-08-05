@@ -4,6 +4,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
+/**
+ * class contains all methods and variables related to and used for movement of
+ * the robot
+ */
 @Config
 public class Movement {
 
@@ -18,11 +22,24 @@ public class Movement {
     Robot robot;
     MovementSettings movementSettings;
 
+    /**
+     * constructor for Movment class that uses default movement settings
+     * 
+     * @param robot passed in to allow Movement class to interface and use other
+     *              parts of the robot
+     */
     Movement(Robot robot) {
         movementSettings = new MovementSettings();
         this.robot = robot;
     }
 
+    /**
+     * constructor for Movment class that uses custom movement settings
+     * 
+     * @param robot            passed in to allow Movement class to interface and
+     *                         use other parts of the robot
+     * @param movementSettings custom settings for Movement class
+     */
     Movement(Robot robot, MovementSettings movementSettings) {
         this.movementSettings = movementSettings;
         this.robot = robot;
@@ -32,6 +49,20 @@ public class Movement {
     // turn methods//
     ////////////////
 
+    /**
+     * turns the robot to a specified angle
+     * 
+     * @param targetAngle                    the angle you want the robot to turn to
+     * @param tolerance                      the maximun tolerance to finish the
+     *                                       turn
+     * @param numberOfTimesToStayInTolerance the number of times to be in tolerance
+     *                                       before turn finishes
+     * @param maxRuntime                     the maximum time the turn can take
+     *                                       before quiting
+     * @param maxSpeed                       the maximum speed of the turn
+     * @param turnPID                        the pid tune for getting power from
+     *                                       angle error
+     */
     void turnToAngle(double targetAngle, double tolerance, int numberOfTimesToStayInTolerance, int maxRuntime,
             double maxSpeed, PIDCoefficients turnPID) {
         double error = robot.findAngleError(robot.positionTracker.currentPosition.R, targetAngle);
@@ -60,12 +91,31 @@ public class Movement {
         }
     }
 
+    /**
+     * turns the robot to a specified angle - uses default PID in
+     * movementSettings.turnPID
+     * 
+     * @param targetAngle                    the angle you want the robot to turn to
+     * @param tolerance                      the maximun tolerance to finish the
+     *                                       turn
+     * @param numberOfTimesToStayInTolerance the number of times to be in tolerance
+     *                                       before turn finishes
+     * @param maxRuntime                     the maximum time the turn can take
+     *                                       before quitting
+     * @param maxSpeed                       the maximum speed of the turn
+     */
     void turnToAngle(double targetAngle, double tolerance, int numberOfTimesToStayInTolerance, int maxRuntime,
             double maxSpeed) {
         turnToAngle(targetAngle, tolerance, numberOfTimesToStayInTolerance, maxRuntime, maxSpeed,
                 movementSettings.turnPID);
     }
 
+    /**
+     * turns the robot to a specified angle
+     * 
+     * @param targetAngle the angle you want the robot to turn to
+     * @param rtas        the settings for turnToAngle
+     */
     void turnToAngle(double targetAngle, RotToAngleSettings rtas) {
         if (!rtas.isPIDValid()) {
             rtas.turnPID = movementSettings.turnPID;
@@ -76,6 +126,20 @@ public class Movement {
     ////////////////
     // move methods//
     ////////////////
+
+    /**
+     * moves the robot to a specified position and angle
+     * 
+     * @param targetPos              the target position for the robot
+     * @param tol                    the tolerance for the final position
+     * @param timesToStayInTolerance the number of times to be in tolerance before
+     *                               move finishes
+     * @param maxLoops               the maximum number of loops before move quits
+     * @param moveXPID               the x pid tune for getting power from x error
+     * @param moveYPID               the y pid tune for getting power from y error
+     * @param turnPID                the pid tune for getting power from angle error
+     * @param maxSpeed               the maximum speed of move
+     */
     void moveToPosition(Position targetPos, double[] tol, int timesToStayInTolerance, int maxLoops,
             PIDCoefficients moveXPID, PIDCoefficients moveYPID, PIDCoefficients turnPID, double maxSpeed) {
         if (robot.robotUsage.positionUsage.positionTrackingEnabled()) {
@@ -142,11 +206,28 @@ public class Movement {
                     "robot can not move to positionTracker because it does not know its positionTracker");
     }
 
+    /**
+     * moves the robot to a specified position and angle - uses default PIDs from
+     * movementSettings
+     * 
+     * @param targetPos              the target position for the robot
+     * @param tol                    the tolerance for the final position
+     * @param timesToStayInTolerance the number of times to be in tolerance before
+     *                               move finishes
+     * @param maxLoops               the maximum number of loops before move quits
+     * @param maxSpeed               the maximum speed of move
+     */
     void moveToPosition(Position targetPos, double[] tol, int timesToStayInTolerance, int maxLoops, double maxSpeed) {
         moveToPosition(targetPos, tol, timesToStayInTolerance, maxLoops, movementSettings.moveXPID,
                 movementSettings.moveYPID, movementSettings.turnPID, maxSpeed);
     }
 
+    /**
+     * moves the robot to a specified position and angle
+     * 
+     * @param targetPos the target position for the robot
+     * @param mtps      the settings for move to position
+     */
     void moveToPosition(Position targetPos, MoveToPositionSettings mtps) {
         if (mtps.isPIDValid())
             moveToPosition(targetPos, mtps.tol, mtps.timesInTol, mtps.maxRuntime, mtps.xPID, mtps.yPID, mtps.turnPID,
@@ -159,6 +240,11 @@ public class Movement {
     // teleOp//
     //////////
 
+    /**
+     * sets the speed multiplier for moveForTeleOp
+     * 
+     * @param amount the speed multiplier you want to set it to
+     */
     void setSpeedMultiplier(double amount) {
         if (amount > movementSettings.speedMultiplierMax) {
             if (robot.robotSettings.debug_methods)
@@ -174,14 +260,28 @@ public class Movement {
         speedMultiplier = amount;
     }
 
+    /**
+     * sets the speed multiplier to max from movementSettings
+     */
     void setSpeedMultiplierToMax() {
         speedMultiplier = movementSettings.speedMultiplierMax;
     }
 
+    /**
+     * sets the speed multiplier to min from movementSettings
+     */
     void setSpeedMultiplierToMin() {
         speedMultiplier = movementSettings.speedMultiplierMin;
     }
 
+    /**
+     * moves the robot from gamepad for teleOp
+     * 
+     * @param gamepad      the gamepad used for moving the robot
+     * @param breakButton  button for stoping the robot immediately - if gamepad is
+     *                     null it will use gamepad from above
+     * @param useTelemetry turns on and off the telemetry for movement
+     */
     void moveForTeleOp(Gamepad gamepad, GamepadButtonManager breakButton, boolean useTelemetry) {
         if (breakButton.gamepad == null)
             breakButton.gamepad = gamepad;
@@ -199,6 +299,12 @@ public class Movement {
             teleOpTelemetry();
     }
 
+    /**
+     * moves the robot from gamepad for teleOp - without breaks
+     * 
+     * @param gamepad      the gamepad used for moving the robot
+     * @param useTelemetry turns on and off the telemetry for movement
+     */
     void moveForTeleOp(Gamepad gamepad, boolean useTelemetry) {
         robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors,
                 moveRobotPowers(movementSettings.XMoveStick.getSliderValue(gamepad),
@@ -208,32 +314,62 @@ public class Movement {
             teleOpTelemetry();
     }
 
+    /**
+     * telemetry for movement
+     */
     void teleOpTelemetry() {
         robot.addTelemetry("rot", robot.positionTracker.currentPosition.R);
     }
 
-    void headlessMoveForTeleOp(Gamepad gamepad1, double offset) {
+    /**
+     * moves the robot based on a feild oriented plane
+     * 
+     * @param gamepad the gamepad used for moving the robot
+     * @param offset  the angle offset from 0 for the robot to move strait
+     */
+    void headlessMoveForTeleOp(Gamepad gamepad, double offset) {
         double curAngle = -robot.positionTracker.currentPosition.R + offset;
         curAngle = robot.scaleAngle(curAngle);
-        double gamepadAngle = robot.getAngleFromXY(-gamepad1.left_stick_x, -gamepad1.left_stick_y);
+        double gamepadAngle = robot.getAngleFromXY(-gamepad.left_stick_x, -gamepad.left_stick_y);
         double error = -robot.findAngleError(curAngle, gamepadAngle);
-        double power = Math.max(Math.abs(gamepad1.left_stick_x), Math.abs(gamepad1.left_stick_y));
+        double power = Math.max(Math.abs(gamepad.left_stick_x), Math.abs(gamepad.left_stick_y));
         double[] XY = robot.getXYFromAngle(error);
         XY[0] *= power;
         XY[1] *= power;
         robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors,
-                moveRobotPowers(XY[0], XY[1], gamepad1.right_stick_x, true, true));
+                moveRobotPowers(XY[0], XY[1], gamepad.right_stick_x, true, true));
     }
 
     /////////
     // other//
     /////////
 
+    /**
+     * moves the robot based on specific powers
+     * 
+     * @param X                    the x power of the robot
+     * @param Y                    the y power of the robot
+     * @param rotation             the rotation power of the robot
+     * @param applySpeedMultiplier whether or not the speed multiplyer is apllied or
+     *                             just set to 1
+     * @param applyMoveSmoothing   whether or not to apply smoothing
+     */
     void moveRobot(double X, double Y, double rotation, boolean applySpeedMultiplier, boolean applyMoveSmoothing) {
         robot.robotHardware.setMotorsToSeparatePowersArrayList(robot.robotHardware.driveMotors,
                 moveRobotPowers(X, Y, rotation, applySpeedMultiplier, applyMoveSmoothing));
     }
 
+    /**
+     * the powers needed to move the robot at certin rates
+     * 
+     * @param X                    the x power of the robot
+     * @param Y                    the y power of the robot
+     * @param rotation             the rotation power of the robot
+     * @param applySpeedMultiplier whether or not the speed multiplyer is apllied or
+     *                             just set to 1
+     * @param applyMoveSmoothing   whether or not to apply smoothing
+     * @return the powers that the motors need to move at certin rates
+     */
     double[] moveRobotPowers(double X, double Y, double rotation, boolean applySpeedMultiplier,
             boolean applyMoveSmoothing) {
         if (applyMoveSmoothing) {
@@ -262,6 +398,14 @@ public class Movement {
         return (arr);
     }
 
+    /**
+     * gives the powers for moving the robot at a certin angle and power
+     * 
+     * @param angle          angle for the robot to move at
+     * @param basePower      power for the robot to move at
+     * @param applySmoothing whether or not to apply smoothing to powers
+     * @return the powers for the motors to move at angle
+     */
     double[] moveAtAnglePowers(double angle, double basePower, boolean applySmoothing) {
         double[] arr;
         arr = robot.getXYFromAngle(angle);
@@ -271,6 +415,14 @@ public class Movement {
         return moveRobotPowers(x, y, 0, false, applySmoothing);
     }
 
+    /**
+     * applies smoothing to a value
+     * 
+     * @param currentVal     the current set value
+     * @param lastVal        the last value
+     * @param smoothingSteps the step to add or subtract from last value
+     * @return the smoothed value
+     */
     double applySmoothing(double currentVal, double lastVal, double smoothingSteps) {
         if (currentVal - lastVal > smoothingSteps) {
             currentVal = lastVal + smoothingSteps;
@@ -281,6 +433,9 @@ public class Movement {
     }
 }
 
+/**
+ * settings used for the Movement class
+ */
 @Config
 class MovementSettings {
     //////////////////
@@ -307,10 +462,16 @@ class MovementSettings {
     MoveToPositionSettings capturePosSettings = new MoveToPositionSettings(new double[] { .75, .75, .5 }, 20, 3000, 1);
     MoveToPositionSettings mediumPosSettings = new MoveToPositionSettings(new double[] { 1.5, 1.5, 1 }, 20, 10000, 1);
 
+    /**
+     * default constructor that uses preset values
+     */
     MovementSettings() {
     }
 }
 
+/**
+ * settings used for moveToPosition
+ */
 class MoveToPositionSettings {
     double[] tol;
     int timesInTol;
@@ -320,9 +481,20 @@ class MoveToPositionSettings {
     PIDCoefficients xPID = null;
     PIDCoefficients yPID = null;
 
+    /**
+     * constructor that keeps all the values empty
+     */
     MoveToPositionSettings() {
     }
 
+    /**
+     * constructor that sets all values exept PIDs
+     * 
+     * @param tol        the tolerance for the final position
+     * @param timesInTol the number of times to be in tolerance before move finishes
+     * @param maxRuntime the maximum number of loops before move quits
+     * @param maxPower   the maximum speed of move
+     */
     MoveToPositionSettings(double[] tol, int timesInTol, int maxRuntime, double maxPower) {
         this.tol = tol;
         this.timesInTol = timesInTol;
@@ -330,6 +502,17 @@ class MoveToPositionSettings {
         this.maxPower = maxPower;
     }
 
+    /**
+     * constructor that sets all values
+     * 
+     * @param tol        the tolerance for the final position
+     * @param timesInTol the number of times to be in tolerance before move finishes
+     * @param maxRuntime the maximum number of loops before move quits
+     * @param maxPower   the maximum speed of move
+     * @param xPID       the x pid tune for getting power from x error
+     * @param yPID       the y pid tune for getting power from y error
+     * @param turnPID    the pid tune for getting power from angle error
+     */
     MoveToPositionSettings(double[] tol, int timesInTol, int maxRuntime, double maxPower, PIDCoefficients xPID,
             PIDCoefficients yPID, PIDCoefficients turnPID) {
         this.tol = tol;
@@ -341,10 +524,18 @@ class MoveToPositionSettings {
         this.turnPID = turnPID;
     }
 
+    /**
+     * checks whether the PIDs are defined or not
+     * @return whether or not the PIDs are valid
+     */
     public boolean isPIDValid() {
         return turnPID != null && xPID != null && yPID != null;
     }
 
+    /**
+     * returns RotToAngleSettings from MoveToPositionSettings
+     * @return settings for turnToAngle
+     */
     RotToAngleSettings toRotAngleSettings() {
         if (turnPID != null)
             return new RotToAngleSettings(tol[2], timesInTol, maxRuntime, maxPower, turnPID);
@@ -360,9 +551,20 @@ class RotToAngleSettings {
     double maxPower;
     PIDCoefficients turnPID;
 
+    /**
+     * constructor that keeps all the values empty
+     */
     RotToAngleSettings() {
     }
 
+    /**
+     * constructor that sets all values exept PIDs
+     * 
+     * @param tol        the tolerance for the final angle
+     * @param timesInTol the number of times to be in tolerance before turn finishes
+     * @param maxRuntime the maximum number of loops before turn quits
+     * @param maxPower   the maximum speed of turn
+     */
     RotToAngleSettings(double tol, int timesInTol, int maxRuntime, double maxPower) {
         this.tol = tol;
         this.timesInTol = timesInTol;
@@ -370,6 +572,15 @@ class RotToAngleSettings {
         this.maxPower = maxPower;
     }
 
+    /**
+     * constructor that sets all values
+     * 
+     * @param tol        the tolerance for the final turn
+     * @param timesInTol the number of times to be in tolerance before turn finishes
+     * @param maxRuntime the maximum number of loops before turn quits
+     * @param maxPower   the maximum speed of turn
+     * @param turnPID    the PID tune for getting power from angle error
+     */
     RotToAngleSettings(double tol, int timesInTol, int maxRuntime, double maxPower, PIDCoefficients turnPID) {
         this.tol = tol;
         this.timesInTol = timesInTol;
@@ -378,6 +589,10 @@ class RotToAngleSettings {
         this.turnPID = turnPID;
     }
 
+    /**
+     * checks whether the PID is defined or not
+     * @return whether or not the PID is valid
+     */
     boolean isPIDValid() {
         return turnPID != null;
     }
