@@ -12,6 +12,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * stores and configures all the hardware objects for all robot parts - also
+ * contains methods for setting multiple objects at once and intilizing hardware groups
+ */
 @Config
 public class RobotHardware {
 
@@ -20,6 +24,9 @@ public class RobotHardware {
     /////////
     // drive
     protected DcMotorEx leftTopMotor, leftBottomMotor, rightTopMotor, rightBottomMotor;
+    /**
+     * list that contains all drive motors - makes setting drivetrain easier
+     */
     protected List<DcMotorEx> driveMotors;
 
     // launcher

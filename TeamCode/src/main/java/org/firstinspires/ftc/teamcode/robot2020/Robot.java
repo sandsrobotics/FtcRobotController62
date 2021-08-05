@@ -16,6 +16,11 @@ import org.firstinspires.ftc.teamcode.robot2020.persistence.AppDatabase;
 
 import static java.lang.Thread.currentThread;
 
+/**
+ * Main class that contains all robot parts, settings, and other objects for
+ * robot functionality. Allows all parts to talk to eachother and provides high
+ * level functions and math.
+ */
 @Config
 public class Robot {
     ///////////////////
@@ -43,20 +48,66 @@ public class Robot {
     protected Gamepad gamepad1;
     protected Gamepad gamepad2;
     TelemetryPacket packet = new TelemetryPacket();
-    public static boolean emergencyStop = false; // trdgdfg
+    public static boolean emergencyStop = false;
 
+    /**
+     * constructor for main robot class with custom settings and usages
+     * 
+     * @param opMode            object passed in from main class containing
+     *                          hardwareMap, gamepads, telemetry, and other
+     *                          objects/funtions
+     * @param robotUsage        contains all the flags to turn on and off all the
+     *                          parts of the robot
+     * @param robotSettingsMain contains all the settings for the diffrent parts of
+     *                          the robot
+     */
     Robot(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain) {
         init(opMode, robotUsage, robotSettingsMain);
     }
 
+    /**
+     * constructor for main robot class with default settings and custom usages
+     * 
+     * @param opMode            object passed in from main class containing
+     *                          hardwareMap, gamepads, telemetry, and other
+     *                          objects/funtions
+     * @param robotUsage        contains all the flags to turn on and off all the
+     *                          parts of the robot
+     * @param robotSettingsMain contains all the settings for the diffrent parts of
+     *                          the robot
+     */
     Robot(LinearOpMode opMode, RobotUsage robotUsage) {
         init(opMode, robotUsage, new RobotSettingsMain());
     }
 
+    /**
+     * constructor for main robot class with default settings and usages (default
+     * usage = all flags true)
+     * 
+     * @param opMode            object passed in from main class containing
+     *                          hardwareMap, gamepads, telemetry, and other
+     *                          objects/funtions
+     * @param robotUsage        contains all the flags to turn on and off all the
+     *                          parts of the robot
+     * @param robotSettingsMain contains all the settings for the diffrent parts of
+     *                          the robot
+     */
     Robot(LinearOpMode opMode) {
         init(opMode, new RobotUsage(), new RobotSettingsMain());
     }
 
+    /**
+     * sets and initializes the variables and hardware in the robot class and all
+     * its components
+     * 
+     * @param opMode            object passed in from main class containing
+     *                          hardwareMap, gamepads, telemetry, and other
+     *                          objects/funtions
+     * @param robotUsage        contains all the flags to turn on and off all the
+     *                          parts of the robot
+     * @param robotSettingsMain contains all the settings for the diffrent parts of
+     *                          the robot
+     */
     private void init(LinearOpMode opMode, RobotUsage robotUsage, RobotSettingsMain robotSettingsMain) {
         this.robotUsage = robotUsage;
         this.robotSettings = robotSettingsMain.robotSettings;
@@ -98,6 +149,9 @@ public class Robot {
         }
     }
 
+    /**
+     * initializes sensors, telemetry, and database contained in the robot class
+     */
     void initHardware() {
         ///////////
         // sensors//
@@ -133,6 +187,13 @@ public class Robot {
 
     // ------------------My Methods------------------//
 
+    /**
+     * starts/initializes telemetry and robot parts
+     * 
+     * @param resetGrabberPos flag to reset position of grabber
+     * @param isAuto          flag to tell the robot class and its parts whether it
+     *                        is an autonomous or not
+     */
     void start(boolean resetGrabberPos, boolean isAuto) {
         startTelemetry();
         if (robotUsage.positionUsage.useThread())
@@ -150,12 +211,22 @@ public class Robot {
     // telemetry//
     /////////////
 
+    /**
+     * if sending telemetry to dashboard it starts the dashboard telemetry by
+     * creating a new telemetry packet object
+     */
     void startTelemetry() {
         if (robotSettings.debug_dashboard) {
             packet = new TelemetryPacket();
         }
     }
 
+    /**
+     * adds telemetry to both dashboard and app based on flags in robotSettings
+     * 
+     * @param cap the string that defines what the value is representing
+     * @param val the value that comes after the caption, seperated by a :
+     */
     void addTelemetry(String cap, Object val) {
         if (robotSettings.debug_dashboard)
             packet.put(cap, val);
@@ -163,6 +234,9 @@ public class Robot {
             telemetry.addData(cap, val);
     }
 
+    /**
+     * sends the telemetry to the dashbaord and app based on flags in robotSettings
+     */
     void sendTelemetry() {
         if (robotSettings.debug_dashboard)
             dashboard.sendTelemetryPacket(packet);
@@ -173,6 +247,14 @@ public class Robot {
     ////////////////
     // calculations//
     ////////////////
+
+    /**
+     * find the smallest angle between the target and current angle
+     * 
+     * @param currentAngle the current angle you are at
+     * @param targetAngle  the angle that you want to get to
+     * @return the angle you need to turn from currentAngle to get to targetAngle
+     */
     double findAngleError(double currentAngle, double targetAngle) {
         targetAngle = scaleAngle(targetAngle);
         double angleError = currentAngle - targetAngle;
@@ -184,8 +266,13 @@ public class Robot {
         return -angleError;
     }
 
-    double scaleAngle(double angle)// scales an angle to fit in -180 to 180
-    {
+    /**
+     * scales angle
+     * 
+     * @param angle input angle from 0 - 360
+     * @return scaled angle from -180 - 180
+     */
+    double scaleAngle(double angle) {
         if (angle > 180) {
             return angle - 360;
         }
@@ -195,10 +282,23 @@ public class Robot {
         return angle;
     }
 
+    /**
+     * gets the angle of a line based on its x and y end point
+     * 
+     * @param X the x length
+     * @param Y the y length
+     * @return the angle of the line
+     */
     double getAngleFromXY(double X, double Y) {
         return Math.atan2(X, Y) * (180 / Math.PI);
     }
 
+    /**
+     * gets x and y distances based on angle
+     * 
+     * @param angle angle to convert to x and y
+     * @return an array with x and y (x + y = 1)
+     */
     double[] getXYFromAngle(double angle) {
         // deg to rad
         angle /= (180 / Math.PI);
@@ -217,6 +317,13 @@ public class Robot {
     /////////
     // other//
     /////////
+
+    /**
+     * runs the thread waiting for the delay to be up - allows for delay to be
+     * inturupted with flags in Robot.stop()
+     * 
+     * @param ms the miliseconds that you want the thread to sleep
+     */
     void delay(long ms) {
         long last = System.currentTimeMillis();
         while (System.currentTimeMillis() - last < ms) {
@@ -225,9 +332,14 @@ public class Robot {
         }
     }
 
+    /**
+     * puts the thread that calls this method to sleep for a certin time
+     * 
+     * @param ms the miliseconds that you want the thread to sleep
+     */
     void sleep(long ms) {
         try {
-            currentThread().sleep(ms);
+            Thread.sleep(ms);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -239,7 +351,7 @@ public class Robot {
 }
 
 /**
- * contains markers to turn on and off all the parts of the robot
+ * contains flags to turn on and off all the parts of the robot
  */
 class RobotUsage {
     boolean useDrive, useComplexMovement, useLauncher, useGrabber;
@@ -267,9 +379,9 @@ class RobotUsage {
      * 
      * @param useDrive           controls the wheel motors and encoders and
      *                           initilizes the movemnt classes
-     * @param useComplexMovement - requires useDrive to be enabled - initilizes the
-     *                           ComplexMovement class that can record and replay
-     *                           movements plus store them in a database
+     * @param useComplexMovement initilizes the ComplexMovement class that can
+     *                           record and replay movements plus store them in a
+     *                           database - requires useDrive to be enabled
      * @param useLauncher        contorls the launcher and intake - if you want to
      *                           use the auto-launch functions you also need to
      *                           enable useDrive and position tracking from
@@ -307,19 +419,40 @@ class RobotUsage {
 }
 
 /**
- * 
+ * contains all flags related to tracking position
  */
 class PositionUsage {
     boolean usePosition, useEncoders, useDistanceSensors, useCamera, usePositionThread;
 
+    /**
+     * sets all flags in PositionUsage to true
+     */
     PositionUsage() {
         setAllToValue(true);
     }
 
+    /**
+     * sets all flags in RobotUsage to the variable value
+     * 
+     * @param value sets all the flags in RobotUsage
+     */
     PositionUsage(boolean value) {
         setAllToValue(value);
     }
 
+    /**
+     * sets all flags based on there corresponding variables
+     * 
+     * @param usePosition        this flag turns on and off position tracking
+     * @param usePositionThread  this flag runs position tracking in a thread so you
+     *                           dont have to constantly call the tracking methods
+     * @param useEncoders        this flag runs the position tracking using the
+     *                           drive wheel encoders
+     * @param useDistanceSensors this flag runs the position tracking using the
+     *                           distance sensors
+     * @param useCamera          this flag runs the position tracking using the
+     *                           intel camera
+     */
     PositionUsage(boolean usePosition, boolean usePositionThread, boolean useEncoders, boolean useDistanceSensors,
             boolean useCamera) {
         this.usePosition = usePosition;
@@ -329,6 +462,11 @@ class PositionUsage {
         this.useCamera = useCamera;
     }
 
+    /**
+     * sets all flags to the variable value
+     * 
+     * @param value the value you want to set all the flags to
+     */
     void setAllToValue(boolean value) {
         this.usePosition = value;
         this.usePositionThread = value;
@@ -337,26 +475,62 @@ class PositionUsage {
         this.useCamera = value;
     }
 
+    /**
+     * tells whether or not a thread is used for position tracking
+     * 
+     * @return if a thread is being used for position tracking
+     */
     boolean useThread() {
         return usePosition && usePositionThread;
     }
 
+    /**
+     * tells whether or not the position is being tracked
+     * 
+     * @return if position is being tracked
+     */
     boolean positionTrackingEnabled() {
         return usePosition && (useDistanceSensors || useEncoders || useCamera);
     }
 }
 
+/**
+ * contains all flags related to vision
+ */
 class VisionUsage {
     boolean useVision, useVuforia, useVuforiaInThread, useTensorFlow, useTensorFlowInTread, useOpenCV;
 
+    /**
+     * sets all flags in VisionUsage to true
+     */
     VisionUsage() {
         setAllToValue(true);
     }
 
+    /**
+     * sets all flags in VisionUsage to the variable value
+     * 
+     * @param value sets all the flags in VisionUsage
+     */
     VisionUsage(boolean value) {
         setAllToValue(value);
     }
 
+    /**
+     * sets all flags based on there corresponding variables
+     * 
+     * @param useVision            this flag makes the Vision class
+     * @param useVuforia           this flag truns on and initializes vuforia
+     * @param useVuforiaInThread   this flag runs vuforia in a thread so you can
+     *                             constantly check for viewmarks - requires
+     *                             useVuforia to be true
+     * @param useTensorFlow        this flag truns on and initializes tensorflow -
+     *                             requires vuforia to be on
+     * @param useTensorFlowInTread this flag runs tensorflow in a thread - requires
+     *                             useVuforia and useTensorFlow to be true
+     * @param useOpenCV            this flag initilizes and starts the opencv
+     *                             pipeline
+     */
     VisionUsage(boolean useVision, boolean useVuforia, boolean useVuforiaInThread, boolean useTensorFlow,
             boolean useTensorFlowInTread, boolean useOpenCV) {
         this.useVision = useVision;
@@ -367,6 +541,11 @@ class VisionUsage {
         this.useTensorFlowInTread = useTensorFlowInTread;
     }
 
+    /**
+     * sets all flags to the variable value
+     * 
+     * @param value the value that all flags are set to
+     */
     void setAllToValue(boolean value) {
         this.useVision = value;
         this.useVuforia = value;
@@ -376,11 +555,19 @@ class VisionUsage {
         this.useTensorFlowInTread = value;
     }
 
+    /**
+     * checks whether or not the Vision class needs/uses a thread
+     * 
+     * @return if a thread was being used for vision
+     */
     boolean useThread() {
         return useVision && useVuforia && (useVuforiaInThread || (useTensorFlow && useTensorFlowInTread));
     }
 }
 
+/**
+ * stores settings for the Robot class
+ */
 class RobotSettings {
     /////////////
     // user data//
@@ -393,10 +580,16 @@ class RobotSettings {
     // database
     protected String dataBaseName = "FIRST_INSPIRE_2020";
 
+    /**
+     * normal constructor - sets all values to preset values
+     */
     RobotSettings() {
     }
 }
 
+/**
+ * stores the settings for all parts/classes of the robot
+ */
 class RobotSettingsMain {
     protected RobotSettings robotSettings;
     protected GrabberSettings grabberSettings;
@@ -406,6 +599,9 @@ class RobotSettingsMain {
     protected PositionSettings positionSettings;
     protected VisionSettings visionSettings;
 
+    /**
+     * sets all setting classes to default preset values
+     */
     RobotSettingsMain() {
         robotSettings = new RobotSettings();
         grabberSettings = new GrabberSettings();
@@ -416,6 +612,17 @@ class RobotSettingsMain {
         visionSettings = new VisionSettings();
     }
 
+    /**
+     * sets all setting classes to custom values from variables
+     * 
+     * @param robotSettings    settings for Robot class
+     * @param grabberSettings  settings for Grabber class
+     * @param launcherSettings settings for Launcher class
+     * @param hardwareSettings settings for RobotHardware class
+     * @param movementSettings settings for Movement class
+     * @param positionSettings settings for Position class
+     * @param visionSettings   settings for Vision class
+     */
     RobotSettingsMain(RobotSettings robotSettings, GrabberSettings grabberSettings, LauncherSettings launcherSettings,
             HardwareSettings hardwareSettings, MovementSettings movementSettings, PositionSettings positionSettings,
             VisionSettings visionSettings) {
