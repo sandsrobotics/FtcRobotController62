@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.robot2020;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+/**
+ * runs the grabber arm and intake
+ */
 public class Grabber {
 
     // user variables below
@@ -22,16 +25,32 @@ public class Grabber {
     protected short lastIntakeMode = 2;
     protected long lastModeSwitchTime = System.currentTimeMillis();
 
+    /**
+     * constructor that uses default settings
+     * 
+     * @param robot passed in to allow Movement class to interface and use other
+     *              parts of the robot
+     */
     Grabber(Robot robot) {
         this.robot = robot;
         grabberSettings = new GrabberSettings();
     }
 
+    /**
+     * constructor that uses custom settings
+     * 
+     * @param robot           passed in to allow Movement class to interface and use
+     *                        other parts of the robot
+     * @param grabberSettings the custom settings you want to use
+     */
     Grabber(Robot robot, GrabberSettings grabberSettings) {
         this.robot = robot;
         this.grabberSettings = grabberSettings;
     }
 
+    /**
+     * sets the grabber to 0 using a switch and then resets the motor
+     */
     void initGrabberPos() {
         if (robot.robotHardware.grabberArmLimitSwitch.getState()) {
             int pos = 0;
@@ -47,6 +66,11 @@ public class Grabber {
         robot.robotHardware.grabberLifterMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    /**
+     * sets the grabber arm and intake from controls in GrabberSettings
+     * 
+     * @param gamepad the gamepad you want to get the controls from
+     */
     void setFromControls(Gamepad gamepad) {
         // set encoder
         if (grabberSettings.captureButton.getButtonPressed(gamepad))
@@ -89,6 +113,13 @@ public class Grabber {
          */
     }
 
+    /**
+     * sets and moves the grabber arm and intake from controls plus adds telemetry
+     * based on flag
+     * 
+     * @param gamepad      the gamepad you want the controls from
+     * @param useTelemetry flag to add telemetry
+     */
     void runForTeleOp(Gamepad gamepad, boolean useTelemetry) {
         setFromControls(gamepad);
         moveAll();
@@ -96,10 +127,16 @@ public class Grabber {
             teleOpTelemetry();
     }
 
+    /**
+     * adds telemetry for grabber position
+     */
     void teleOpTelemetry() {
         robot.addTelemetry("grabber pos", robot.robotHardware.grabberLifterMotor.getCurrentPosition());
     }
 
+    /**
+     * moves the motor for the grabber arm
+     */
     void moveMotors() {
         robot.robotHardware.grabberLifterMotor.setTargetPosition(getEncoderSetPos());
         stopMotor();
@@ -111,6 +148,9 @@ public class Grabber {
      * }
      */
 
+    /**
+     * moves the motors for the grabber intake
+     */
     void moveServos() {
         if (intakeMode == 1)
             robot.robotHardware.setServosPower(robot.robotHardware.grabberServos, grabberSettings.servoIntakeSpeed);
@@ -120,11 +160,19 @@ public class Grabber {
             robot.robotHardware.setServosPower(robot.robotHardware.grabberServos, 0);
     }
 
+    /**
+     * moves both the grabber intake and arm
+     */
     void moveAll() {
         moveMotors();
         moveServos();
     }
 
+    /**
+     * sets the mode of the grabber intake
+     * 
+     * @param mode the mode of the intake - 0 = off, 1 = in, 2 = out
+     */
     void setIntakeMode(short mode) {
         if (intakeMode != mode && mode >= 0 && mode <= 2) {
             lastModeSwitchTime = System.currentTimeMillis();
@@ -134,11 +182,23 @@ public class Grabber {
         }
     }
 
+    /**
+     * sets the mode of the grabber intake and moves it
+     * 
+     * @param mode the mode of the intake - 0 = off, 1 = in, 2 = out
+     */
     void setServoModeAndMove(short mode) {
         setIntakeMode(mode);
         moveServos();
     }
 
+    /**
+     * sets the position and moves the grabber arm - optionally it will wait for
+     * motor to get to position
+     * 
+     * @param pos          the position of the grabber arm
+     * @param waitForMotor flag to wait for the motor to reach set position
+     */
     void setGrabberToPos(int pos, boolean waitForMotor) {
         setEncoderSetPos(pos);
         moveMotors();
@@ -148,6 +208,11 @@ public class Grabber {
         }
     }
 
+    /**
+     * sets the set position for the grabber arm
+     * 
+     * @param pos the position you want the arm to go to
+     */
     void setEncoderSetPos(int pos) {
         setEncoderPos = pos;
         if (setEncoderPos > grabberSettings.maxMotorPos)
@@ -158,10 +223,21 @@ public class Grabber {
         // < grabberSettings.straitUpPos) setEncoderPos = grabberSettings.straitUpPos;
     }
 
+    /**
+     * gets the set postion for encoder arm
+     * 
+     * @return the set postion of encoder arm
+     */
     int getEncoderSetPos() {
         return setEncoderPos;
     }
 
+    /**
+     * desides whether or not to stop the motor and then stops motor - on start it
+     * also resets the motor
+     * 
+     * @return whether the motor is stopped or not
+     */
     boolean stopMotor() {
         if (!robot.robotHardware.grabberArmLimitSwitch.getState() && getEncoderSetPos() <= 5) {
             // if(!motorReset)
@@ -185,16 +261,29 @@ public class Grabber {
         return false;
     }
 
+    /**
+     * sets the grabber intake mode to intake and then moves the motors
+     */
     void setGrabberToIntake() {
         setIntakeMode((short) 1);
         moveServos();
     }
 
+    /**
+     * sets the grabber intake mode to off and then stops the motors
+     */
     void setGrabberToIntakeOff() {
         setIntakeMode((short) 0);
         moveServos();
     }
 
+    /**
+     * sets the grabber intake mode to intake - moves the motor until limit switch
+     * is pressed or the max wait time is reached
+     * 
+     * @param maxWaitTime the max time to wait for limit swith before stopping
+     *                    intake
+     */
     void runGrabberIntake(int maxWaitTime) {
         setIntakeMode((short) 1);
         moveServos();
@@ -206,10 +295,20 @@ public class Grabber {
         moveServos();
     }
 
+    /**
+     * same function as runGrabberIntake(int maxWaitTime) but uses
+     * grabberSettings.maxIntakeTime instead
+     */
     void runGrabberIntake() {
         runGrabberIntake(grabberSettings.maxIntakeTime);
     }
 
+    /**
+     * sets the grabber intake mode to outtake and runs until delay is over
+     * 
+     * @param useDelay whether or not to use a delay then turn off intake
+     * @param delay    the delay time before turning off intake
+     */
     void runGrabberOuttake(boolean useDelay, int delay) {
         setIntakeMode((short) 2);
         moveServos();
@@ -220,6 +319,12 @@ public class Grabber {
         }
     }
 
+    /**
+     * sets the grabber intake mode to outtake and runs until delay is over - delay
+     * is gotten from grabberSettings.outtakeTime
+     * 
+     * @param useDelay whether or not to use a delay then turn off intake
+     */
     void runGrabberOuttake(boolean useDelay) {
         runGrabberOuttake(useDelay, grabberSettings.outtakeTime);
     }
@@ -234,6 +339,11 @@ public class Grabber {
     ////////
     // auto//
     ////////
+
+    /**
+     * automatically lifts grabber arm, moves to drop area, drops goal, moves back,
+     * and lowers grabber arm - requres position tracking and drive
+     */
     void autoDrop() {
         if (robot.robotUsage.useDrive && robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             setGrabberToPos(grabberSettings.putOverPos, false);
@@ -287,6 +397,9 @@ class GrabberSettings {
     // homing
     int homingSpeed = 50;
 
+    /**
+     * default constructor that uses preset values for GrabberSettings
+     */
     GrabberSettings() {
     }
 }
