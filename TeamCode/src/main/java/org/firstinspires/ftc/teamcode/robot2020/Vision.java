@@ -42,58 +42,88 @@ public class Vision extends Thread {
     // other variables//
     ////////////////////
     // object location
-    protected volatile OpenGLMatrix[] lastTrackablesLocations = new OpenGLMatrix[5]; // stores the last known
-                                                                                     // positionTracker of trackables
-    protected volatile OpenGLMatrix[] currentTrackablesLocations = new OpenGLMatrix[5]; // stores the current
-                                                                                        // positionTracker of trackables
-                                                                                        // if they are visible
-    protected volatile OpenGLMatrix lastCalculatedRobotLocation = new OpenGLMatrix(); // stores the last known robot
-                                                                                      // location from trackables
-    protected volatile OpenGLMatrix currentCalculatedRobotLocation = new OpenGLMatrix(); // stores the current robot
-                                                                                         // location if any trackables
-                                                                                         // are visible
-    protected volatile boolean anyTrackableFound = false; // stores whether an trackables are visible
+    /** stores the last known positionTracker of trackables */
+    protected volatile OpenGLMatrix[] lastTrackablesLocations = new OpenGLMatrix[5];
+    /** stores the current positionTracker of trackables if they are visible */
+    protected volatile OpenGLMatrix[] currentTrackablesLocations = new OpenGLMatrix[5];
+    /** stores the last known robot location from trackables */
+    protected volatile OpenGLMatrix lastCalculatedRobotLocation = new OpenGLMatrix();
+    /** stores the current robot location if any trackables are visible */
+    protected volatile OpenGLMatrix currentCalculatedRobotLocation = new OpenGLMatrix();
+    /** stores whether an trackables are visible */
+    protected volatile boolean anyTrackableFound = false;
 
     // some vuforia stuff
-    protected VuforiaLocalizer vuforia = null; // API to setup trackables and Tfod
-    protected VuforiaTrackables trackables; // object that check if any trackables are visible
-    protected VuforiaLocalizer.Parameters parameters; // parameters to setup vuforia
+    /** API to setup trackables and Tfod */
+    protected VuforiaLocalizer vuforia = null;
+    /** object that check if any trackables are visible */
+    protected VuforiaTrackables trackables;
+    /** parameters to setup vuforia */
+    protected VuforiaLocalizer.Parameters parameters;
 
     // some openCV stuff
-    protected OpenCvWebcam webcam; // a webcam object to get image
-    protected OpenCvCamera phoneCam; // a phone camera to get picture from phone
-    protected SkystoneDeterminationPipeline pipeline; // pipeline to run OpenCV ring detection
+    /** a webcam object to get image */
+    protected OpenCvWebcam webcam;
+    /** a phone camera to get picture from phone */
+    protected OpenCvCamera phoneCam;
+    /** pipeline to run OpenCV ring detection */
+    protected SkystoneDeterminationPipeline pipeline;
 
     // some tensorFlow stuff
-    TFObjectDetector tfod; // a model object to find any rings
-    protected volatile List<Recognition> tfodCurrentRecognitions; // stores the current positionTracker and amount of
-                                                                  // rings if available
-    protected volatile boolean anyTfodObjectsFound = false; // stores whether any objects where found
+    /** a model object to find any rings */
+    TFObjectDetector tfod;
+    /** stores the current positionTracker and amount of rings if available */
+    protected volatile List<Recognition> tfodCurrentRecognitions;
+    /** stores whether any objects where found */
+    protected volatile boolean anyTfodObjectsFound = false;
 
     // other
     protected int cameraMonitorViewId;
-    protected boolean usingWebcam; // weather or not you are using a web-cam or phone
+    /** weather or not you are using a web-cam or phone */
+    protected boolean usingWebcam;
 
     // other class
-    Robot robot; // to use values/methods from the robot object, other objects, and LinearOpMode
-    VisionSettings visionSettings; // just an object to store all user set variables for vision
+    /**
+     * to use values/methods from the robot object, other objects, and LinearOpMode
+     */
+    Robot robot;
+    /** just an object to store all user set variables for vision */
+    VisionSettings visionSettings;
 
     //////////////////
     // Vision Methods//
     //////////////////
+    /**
+     * constructor for Vision class that uses default vision settings
+     * 
+     * @param robot passed in to allow Vision class to interface and use other parts
+     *              of the robot
+     */
     Vision(Robot robot) {
         visionSettings = new VisionSettings();
         this.robot = robot;
     }
 
+    /**
+     * constructor for Vision class that uses custom vision settings
+     * 
+     * @param robot          passed in to allow Vision class to interface and use
+     *                       other parts of the robot
+     * @param visionSettings custom settings for Vision class
+     */
     Vision(Robot robot, VisionSettings visionSettings) {
         this.visionSettings = visionSettings;
         this.robot = robot;
     }
 
-    void initAll(boolean useVuforia, boolean useOpenCV, boolean useTensorFlow) // sets up all the vision objects and
-                                                                               // camera
-    {
+    /**
+     * initializes all vision models and cameras based on flags
+     * 
+     * @param useVuforia    whether or not to initializes and use vuforia
+     * @param useOpenCV     whether or not to initializes and use openCV
+     * @param useTensorFlow whether or not to initializes and use tensor flow
+     */
+    void initAll(boolean useVuforia, boolean useOpenCV, boolean useTensorFlow) {
         initCamera();
         checkCameraType();
 
@@ -114,8 +144,11 @@ public class Vision extends Thread {
         }
     }
 
-    void initAll() // the method above but it takes values from RobotUsage
-    {
+    /**
+     * initializes all vision models and cameras based on flags from RobotUsage and
+     * sets the camera servo to face the rings
+     */
+    void initAll() {
         initAll(robot.robotUsage.visionUsage.useVuforia, robot.robotUsage.visionUsage.useOpenCV,
                 robot.robotUsage.visionUsage.useTensorFlow);
         robot.robotHardware.initVisionHardware();
@@ -123,12 +156,18 @@ public class Vision extends Thread {
 
     }
 
-    void initCamera() // gets the camera Id to make initialization easier for vision objects
-    {
+    /**
+     * gets the camera Id to make initialization easier for vision objects
+     */
+    void initCamera() {
         cameraMonitorViewId = robot.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id",
                 robot.hardwareMap.appContext.getPackageName());
     }
 
+    /**
+     * automaticly checks if you are useing a webcam or phone cam and stores it in a
+     * flag for the vision objects
+     */
     void checkCameraType() {
         try {
             robot.hardwareMap.get(WebcamName.class, "Webcam 1");
@@ -141,8 +180,10 @@ public class Vision extends Thread {
     ///////////////////
     // Vuforia Methods//
     ///////////////////
-    void initVuforia() // initializes vuforia
-    {
+    /**
+     * initializes vuforia objects and creates a vuforia instance
+     */
+    void initVuforia() {
         // make a parameters object
         parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
@@ -157,24 +198,39 @@ public class Vision extends Thread {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
 
+    /**
+     * starts a dashboard stream at a certain fps from vuforia or tensor flow
+     * 
+     * @param maxFps     the maximum fps to stream at - to conserve bandwith
+     * @param useVuforia whether to use vuforia stream or tensorflow stream
+     */
     void startDashboardCameraStream(int maxFps, boolean useVuforia) {
         if (useVuforia && vuforia != null)
             FtcDashboard.getInstance().startCameraStream(vuforia, maxFps);
         else if (tfod != null)
             FtcDashboard.getInstance().startCameraStream(tfod, maxFps);
-    } // starts a dashboard stream at a certain fps
+    }
 
+    /**
+     * stops the dashboard stream
+     */
     void stopDashboardCameraStream() {
         FtcDashboard.getInstance().stopCameraStream();
-    } // stops the dashboard stream
+    }
 
+    /**
+     * loads the vuforia assets from a file
+     * 
+     * @param assetName the name of the file
+     */
     void loadAsset(String assetName) {
         trackables = vuforia.loadTrackablesFromAsset(assetName);
-    } // loads the vuforia assets from a file
+    }
 
-    void setAllTrackablesNames() // sets vuforia tackable names
-    {
-
+    /**
+     * sets the names of all vuforia tackables
+     */
+    void setAllTrackablesNames() {
         setTrackableName(1, "Red Tower Goal Target");
         setTrackableName(2, "Red Alliance Target");
         setTrackableName(0, "Blue Tower Goal Target");
@@ -182,6 +238,9 @@ public class Vision extends Thread {
         setTrackableName(4, "Front Wall Target");
     }
 
+    /**
+     * sets the positions of all vuforia tackables
+     */
     void setAllTrackablesPosition() // sets vuforia tackable positions
     {
         setTrackableTransform(2, new float[] { 0, 0, 0 }, new float[] { 0, 0, 0 });
@@ -191,17 +250,26 @@ public class Vision extends Thread {
         setTrackableTransform(1, new float[] { 0, 0, 0 }, new float[] { 0, 0, 0 });
     }
 
+    /**
+     * sets the name of a certin vuforia trackable
+     * 
+     * @param posInTrackables the trackible item you want to name
+     * @param name            the name you want to give
+     */
     void setTrackableName(int posInTrackables, String name) // sets the name for a single trackable
     {
         trackables.get(posInTrackables).setName(name);
     }
 
-    void setTrackableTransform(int posInTrackables, float[] position, float[] angles) // sets the positionTracker for a
-                                                                                      // single trackable //
-                                                                                      // positionTracker is in inches
-                                                                                      // and rotation is in deg with
-                                                                                      // order XYZ
-    {
+    /**
+     * sets the position for a single vuforia trackable - in inches - rotation is in
+     * deg with order XYZ
+     * 
+     * @param posInTrackables the trackible item you want to set the postion for
+     * @param position        the position of the trackable - in inches
+     * @param angles          the angles of the trackable - in degrees ordered XYZ
+     */
+    void setTrackableTransform(int posInTrackables, float[] position, float[] angles) {
         for (int i = 0; i < position.length; i++)
             position[i] *= Constants.mmPerInch;
 
@@ -209,11 +277,15 @@ public class Vision extends Thread {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, angles[0], angles[1], angles[2])));
     }
 
-    void setPhoneTransform(float[] position, float[] angles) // sets the phone transform // positions is in INCHES: X is
-                                                             // INCHES left from center line, Y is INCHES above ground,
-                                                             // Z is INCHES forward from center line. rotation is in
-                                                             // order XYZ in deg
-    {
+    /**
+     * sets the phone transform positions is in INCHES: X is INCHES left from center
+     * line, Y is INCHES above ground, Z is INCHES forward from center line.
+     * rotation is in degrees orderd XYZ
+     * 
+     * @param position the position of the phone
+     * @param angles   the angle of the phone
+     */
+    void setPhoneTransform(float[] position, float[] angles) {
         for (int i = 0; i < position.length; i++)
             position[i] *= Constants.mmPerInch;
 
@@ -236,20 +308,33 @@ public class Vision extends Thread {
         }
     }
 
-    void setPhoneTorch(boolean on) {
-        CameraDevice.getInstance().setFlashTorchMode(on);
-    } // turns on/off the phone flashlight
+    /**
+     * turns on/off the phone flashlight
+     * 
+     * @param state if the flashlight will be on or off
+     */
+    void setPhoneTorch(boolean state) {
+        CameraDevice.getInstance().setFlashTorchMode(state);
+    }
 
+    /**
+     * activates vuforia trackables to find objects
+     */
     void activateVuforia() {
         trackables.activate();
-    } // activates vuforia trackables to find objects
+    }
 
+    /**
+     * deactivates vuforia trackables if not needed
+     */
     void deactivateVuforia() {
         trackables.deactivate();
-    } // deactivates vuforia trackables if not needed
+    }
 
-    void findAllTrackables() // will find all objects(pictures on wall) that are visible
-    {
+    /**
+     * will find all objects(pictures on wall) that are visible
+     */
+    void findAllTrackables() {
         int i = 0;
         anyTrackableFound = false;
 
@@ -276,11 +361,21 @@ public class Vision extends Thread {
             currentCalculatedRobotLocation = null;
     }
 
-    OpenGLMatrix getCurrentGaolLocation() // returns the current positionTracker for goal picture if visible
-    {
+    /**
+     * returns the current position for goal picture if visible
+     * 
+     * @return the position of goal picture
+     */
+    OpenGLMatrix getCurrentGaolLocation() {
         return currentTrackablesLocations[visionSettings.goalPictureNum];
     }
 
+    /**
+     * takes OpenGLMatrix and returns angles as Orientation
+     * 
+     * @param m OpenGLMatrix you want to convert
+     * @return the angles as Orientation
+     */
     Orientation getTrackableAngles(OpenGLMatrix m) {
         if (m != null)
             return Orientation.getOrientation(m, EXTRINSIC, XYZ, DEGREES);
@@ -290,6 +385,9 @@ public class Vision extends Thread {
     //////////////////////
     // tensorFlow Methods//
     //////////////////////
+    /**
+     * creates and initializes a tensor flow model from the variables
+     */
     void initTfod() {
         int tfodMonitorViewId = robot.hardwareMap.appContext.getResources().getIdentifier("tfodMonitorViewId", "id",
                 robot.hardwareMap.appContext.getPackageName());
@@ -300,19 +398,33 @@ public class Vision extends Thread {
                 visionSettings.LABEL_SECOND_ELEMENT);
     }
 
+    /**
+     * activates the tensor flow model
+     */
     void activateTfod() {
         tfod.activate();
     }
 
+    /**
+     * deactivates the tensor flow model
+     */
     void deactivateTfod() {
         tfod.shutdown();
     }
 
+    /**
+     * activates tensor flow model and sets the zoom plus aspect ratio
+     */
     void tofdActivationSequence() {
         activateTfod();
         tfod.setZoom(2, (double) 16 / (double) 9);
     }
 
+    /**
+     * gets the Recognition object with the highest confidence level
+     * 
+     * @return Recognition object with highest confidence
+     */
     Recognition getHighestConfidence() {
         Recognition out = null;
         if (anyTfodObjectsFound) {
@@ -326,6 +438,12 @@ public class Vision extends Thread {
         return out;
     }
 
+    /**
+     * gets the number of rings from a specific Recognition
+     * 
+     * @param rec the Recognition to get the rings from
+     * @return the number of rings
+     */
     int getNumOfRings(Recognition rec) {
         if (rec != null) {
             if (rec.getLabel().equals("QUAD"))
@@ -336,15 +454,29 @@ public class Vision extends Thread {
         return 0;
     }
 
+    /**
+     * gets the number of rings from the Recognition with highest confidence
+     * 
+     * @return the number of rings
+     */
     int getNumOfRings() {
         return getNumOfRings(getHighestConfidence());
     }
 
+    /**
+     * gets all Recognitions in the current frame
+     */
     void findAllTfodObjects() {
         tfodCurrentRecognitions = tfod.getRecognitions();
         anyTfodObjectsFound = (tfodCurrentRecognitions != null);
     }
 
+    /**
+     * sequence to find all Recognitions in the current frame and get most likely
+     * number of rings
+     * 
+     * @return most likely number of rings in current frame
+     */
     int runTfodSequenceForRings() {
         findAllTfodObjects();
         return getNumOfRings();
@@ -353,6 +485,9 @@ public class Vision extends Thread {
     //////////////////
     // OpenCV Methods//
     //////////////////
+    /**
+     * initializes opencv objects and creates a pipeline to do image prossesing
+     */
     void initOpenCV() {
         if (usingWebcam) {
             // creating a camera object
@@ -394,6 +529,9 @@ public class Vision extends Thread {
         }
     }
 
+    /**
+     * skystone pipeline to do image prossesing
+     */
     public static class SkystoneDeterminationPipeline extends OpenCvPipeline {
         /*
          * An enum to define the skystone positionTracker
@@ -434,15 +572,22 @@ public class Vision extends Thread {
         // Volatile since accessed by OpMode thread w/o synchronization
         volatile RingPosition position = RingPosition.FOUR;
 
-        /*
+        /**
          * This function takes the RGB frame, converts to YCrCb, and extracts the Cb
          * channel to the 'Cb' variable
+         * 
+         * @param input the input image to convert
          */
         void inputToCb(Mat input) {
             Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
             Core.extractChannel(YCrCb, Cb, 1);
         }
 
+        /**
+         * initializes the pipeline
+         * 
+         * @param firstFrame the starting frame
+         */
         @Override
         public void init(Mat firstFrame) {
             inputToCb(firstFrame);
@@ -450,6 +595,12 @@ public class Vision extends Thread {
             region1_Cb = Cb.submat(new Rect(region1_pointA, region1_pointB));
         }
 
+        /**
+         * prosses the frame to get the number of rings
+         * 
+         * @param input the frame to prosses
+         * @return the frame to show
+         */
         @Override
         public Mat processFrame(Mat input) {
             inputToCb(input);
@@ -480,6 +631,11 @@ public class Vision extends Thread {
             return input;
         }
 
+        /**
+         * gets the number of rings in current frame
+         * 
+         * @return the average mean value in the box
+         */
         public int getAnalysis() {
             return avg1;
         }
@@ -590,6 +746,10 @@ public class Vision extends Thread {
     /////////////////
     // vision thread//
     /////////////////
+    /**
+     * the main loop to run in a thread to turn on vision libraries based on flags
+     * and run vision objects
+     */
     public void run() {
         if (robot.robotUsage.visionUsage.useVuforiaInThread)
             activateVuforia();
@@ -609,11 +769,17 @@ public class Vision extends Thread {
             deactivateTfod();
     }
 
+    /**
+     * interrupts the vivion thread to close main loop and shutdown vivion objects
+     */
     public void stopThread() {
         this.interrupt();
     }
 }
 
+/**
+ * settings for Vision class and prossesing libraries
+ */
 class VisionSettings {
     //////////////////
     // user variables//
@@ -632,20 +798,11 @@ class VisionSettings {
     // to see where goal is
     protected final int goalPictureNum = 3; // which picture is the one under the goal
 
-    // to set up easy openCV camera
-    protected final OpenCvInternalCamera.CameraDirection CAMERA_CHOICE_O = OpenCvInternalCamera.CameraDirection.BACK; // if
-                                                                                                                      // you
-                                                                                                                      // are
-                                                                                                                      // using
-                                                                                                                      // a
-                                                                                                                      // phone
-                                                                                                                      // which
-                                                                                                                      // camera
-                                                                                                                      // do
-                                                                                                                      // you
-                                                                                                                      // want
-                                                                                                                      // to
-                                                                                                                      // use
+    /**
+     * to set up easy openCV camera if you are using a phone which camera do you
+     * want to use
+     */
+    protected final OpenCvInternalCamera.CameraDirection CAMERA_CHOICE_O = OpenCvInternalCamera.CameraDirection.BACK;
 
     // tensorFlow
     protected final String TFOD_MODEL_ASSET = "UltimateGoal.tflite"; // what is the name of the model
@@ -656,6 +813,9 @@ class VisionSettings {
     // main cam servo
     double camServoStartPos = .65;
 
+    /**
+     * the default constructor that uses preset values
+     */
     VisionSettings() {
     }
 }
