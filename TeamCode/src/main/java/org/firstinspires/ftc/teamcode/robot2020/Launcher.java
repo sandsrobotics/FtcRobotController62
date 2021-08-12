@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
+/**
+ * runs the launcher's wheel, gate, arm, frog legs, and intake
+ */
 @Config
 public class Launcher {
     ///////////////////
@@ -24,24 +27,43 @@ public class Launcher {
     boolean gateOpen = false;
     boolean runWheelForward = false;
     float intakeMotorPower = 0;
-    int frogLegPos = 0; // -1 = stowed, 0 = rest, 1 = ready, 2 = down
+    /**
+     * -1 = stowed, 0 = rest, 1 = ready, 2 = down
+     */
+    int frogLegPos = 0;
     int lastfrogLegPos = 0;
     double targetWheelRpm;
     Robot robot;
     LauncherSettings launcherSettings;
 
+    /**
+     * constructor that uses defualt LaucherSettings
+     * 
+     * @param robot passed in to allow Movement class to interface and use other
+     *              parts of the robot
+     */
     Launcher(Robot robot) {
         launcherSettings = new LauncherSettings();
         this.robot = robot;
         initData();
     }
 
+    /**
+     * constructor that uses passed in custom LauncherSettings
+     * 
+     * @param robot            passed in to allow Movement class to interface and
+     *                         use other parts of the robot
+     * @param launcherSettings the custom settings that the launcher uses
+     */
     Launcher(Robot robot, LauncherSettings launcherSettings) {
         this.launcherSettings = launcherSettings;
         this.robot = robot;
         initData();
     }
 
+    /**
+     * sets some basic values and gets the calibration data from a file
+     */
     void initData() {
         spinMultiplier = 60 / launcherSettings.ticksPerRev * launcherSettings.gearRatio;
         targetWheelRpm = launcherSettings.startRPM;
@@ -52,6 +74,9 @@ public class Launcher {
     ///////////////////////////
     // launcher opmode control//
     ///////////////////////////
+    /**
+     * does the telemetry output for launcher
+     */
     void telemetryDataOut() {
         if (shutdownWheel)
             robot.addTelemetry("Mode: ", "Run on trigger");
@@ -61,6 +86,12 @@ public class Launcher {
         robot.addTelemetry("Set RPM", targetWheelRpm);
     }
 
+    /**
+     * sets the servos that controls the launch arm and gate from a gamepad and
+     * LauncherSettings
+     * 
+     * @param gamepad the gamepad you want to get input from
+     */
     void setLauncherServos(Gamepad gamepad) {
 
         if (launcherSettings.launchButton.getButtonHeld(gamepad, launcherSettings.buttonHoldTime))
@@ -77,6 +108,12 @@ public class Launcher {
         }
     }
 
+    /**
+     * sets the motor that controls the launch wheel from a gamepad and
+     * LauncherSettings
+     * 
+     * @param gamepad the gamepad you want to get input from
+     */
     void setLauncherWheelMotor(Gamepad gamepad) {
         // inputs
         if (launcherSettings.revDecreaseButton.getButtonPressed(gamepad)
@@ -106,6 +143,11 @@ public class Launcher {
             setRPM();
     }
 
+    /**
+     * sets the intake and froglegs from controls in launcherSettings
+     * 
+     * @param gamepad the gamepad you want to get the controls from
+     */
     void setLauncherIntakeMotor(Gamepad gamepad) {
         intakeMotorPower = 0;
 
@@ -124,6 +166,11 @@ public class Launcher {
         robot.robotHardware.launcherIntakeMotor.setPower(intakeMotorPower);
     }
 
+    /**
+     * sets the froglegs from controls in launcherSettings
+     * 
+     * @param gamepad the gamepad you want to get the controls from
+     */
     void setFrogLegServos(Gamepad gamepad) {
         if (launcherSettings.frogLegStowButton.getButtonPressed(gamepad)) {
             if (frogLegPos != 0)
@@ -140,6 +187,13 @@ public class Launcher {
         }
     }
 
+    /**
+     * runs all the launcher and intake parts plus outputs telemetry from the
+     * telemetry flag
+     * 
+     * @param gamepad   the gamepad that controls all the launcher and intake parts
+     * @param telemetry the flag that controls launcher telemetry output
+     */
     void runForTeleOp(Gamepad gamepad, boolean telemetry) {
         setLauncherServos(gamepad);
         setLauncherWheelMotor(gamepad);
@@ -152,6 +206,11 @@ public class Launcher {
     /////////////////////////////////////
     // auto launcher control - main goal//
     /////////////////////////////////////
+    /**
+     * gets launcher ready for launching, turns towrds goal and moves behind launch
+     * line(if neccesary), sets RPM from table, shoots 3 disks, and gets launcher
+     * ready for intake - requires RPM table, position tracking, and drive
+     */
     void autonomousLaunchDisk() {
         double RPM = calibrationData.getTargetRPMAtDistance(getDistanceToGoal(true), 3);
         if (RPM == -1)
@@ -171,6 +230,11 @@ public class Launcher {
         shutdownWheel = true;
     }
 
+    /**
+     * gets launcher ready for launching, moves to launch position, sets RPM, shoots
+     * 3 disks, and gets launcher ready for intake - requires position tracking, and
+     * drive
+     */
     void autoLaunchDiskFromLine() {
         if (!robot.robotUsage.useDrive)
             robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
@@ -192,6 +256,10 @@ public class Launcher {
 
     }
 
+    /**
+     * turns towrds goal and moves behind launch line(if neccesary) - requires
+     * position tracking and drive
+     */
     void goToShootingPos() {
         if (!robot.robotUsage.useDrive)
             robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
@@ -209,6 +277,10 @@ public class Launcher {
         }
     }
 
+    /**
+     * stows frog legs and moves to the launch position - requires drive and
+     * position tracking
+     */
     void goToLine() {
         if (frogLegPos != -1) {
             stowFrogLegs(false);
@@ -219,6 +291,10 @@ public class Launcher {
     //////////////////////////////////////
     // auto launcher control - power shot//
     //////////////////////////////////////
+    /**
+     * things to run at the start of power shot - opens gate servo, stows frog legs,
+     * and sets and runs RPM for power shot
+     */
     void powerShotStart() {
         openGateServoNoDelay();
         if (frogLegPos != -1) {
@@ -227,12 +303,23 @@ public class Launcher {
         setRPM(launcherSettings.powerShotRPM);
     }
 
+    /**
+     * things to run at the end of power shot - sets RPM for main goal, shuts down
+     * the wheel, and closes gate servo
+     */
     void powerShotEnd() {
         targetWheelRpm = launcherSettings.autoLaunchRPM;
         shutdownWheel = true;
         closeGateServo();
     }
 
+    /**
+     * automaticlly shoot the 3 power shot goals - runs start sequence, moves and
+     * shoots 3 powershot goals, runs end sequence - requires position tracking and
+     * drive
+     * 
+     * @param positions the power shot launch positions
+     */
     void autoLaunchPowerShots(Position[] positions) {
         if (!robot.robotUsage.useDrive)
             robot.addTelemetry("error in Launcher.autonomousLaunchDisk: ", "robot is unable to move");
@@ -252,6 +339,16 @@ public class Launcher {
     ////////////////
     // calculations//
     ////////////////
+    /**
+     * gets the angle to point to goal from current position(or any position behind
+     * the line if flag is enabled)
+     * 
+     * @param xPos            the x position of goal
+     * @param yPos            the y position of goal
+     * @param angleOffset     angle offset
+     * @param useMinLaunchDis flag to see if robot sould be behind min launch line
+     * @return the angle needed to point to goal
+     */
     double getAngleToPointToPosition(double xPos, double yPos, double angleOffset, boolean useMinLaunchDis) {
         if (robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             double XDiff = xPos - robot.positionTracker.currentPosition.X;
@@ -266,22 +363,53 @@ public class Launcher {
         return 0;
     }
 
+    /**
+     * gets the angle to point to 0,0(origin) from current position(or position
+     * behind launch line)
+     * 
+     * @return the angle needed to point to origin
+     */
     double getAngleToPointToPosition() {
         return getAngleToPointToPosition(0, 0, 0, true);
     }
 
+    /**
+     * tells whether or not the rpm is withing a certin passed in tolerance from a
+     * passed in target RPM
+     * 
+     * @param targetWheelRpm the target RPM for the wheel
+     * @param RPMTolerance   the maximum tolerance for RPM to be in range
+     * @return whether the RPM is in tolerance
+     */
     boolean isRPMInTolerance(double targetWheelRpm, double RPMTolerance) {
         return Math.abs(getPRM() - targetWheelRpm) <= RPMTolerance;
     }
 
+    /**
+     * tells whether or not the rpm is within a set tolerance from a set RPM
+     * 
+     * @return whether the RPM is in tolerance
+     */
     boolean isRPMInTolerance() {
         return isRPMInTolerance(targetWheelRpm, launcherSettings.RPMTolerance);
     }
 
+    /**
+     * gets the current RPM of the wheel
+     * 
+     * @return the RPM of the wheel
+     */
     double getPRM() {
         return robot.robotHardware.launcherWheelMotor.getVelocity() * spinMultiplier;
     }
 
+    /**
+     * gets the distance from current position(or position behing launch line if
+     * flag is enabled) to origin(0,0)
+     * 
+     * @param useMinLaunchDistance flag to use the minimum launch distance
+     * @return the distance to origin(goal)
+     */
     double getDistanceToGoal(boolean useMinLaunchDistance) {
         if (robot.robotUsage.positionUsage.positionTrackingEnabled()) {
             if (robot.positionTracker.currentPosition.Y > launcherSettings.minLaunchDistance || !useMinLaunchDistance)
@@ -299,15 +427,30 @@ public class Launcher {
     /////////
     // other//
     /////////
+    /**
+     * sets the target and actual RPM from paramiter RPM
+     * 
+     * @param RPM the RPM you want to set the wheel to
+     */
     void setRPM(double RPM) {
         targetWheelRpm = RPM;
         robot.robotHardware.launcherWheelMotor.setVelocity(RPM / spinMultiplier);
     }
 
+    /**
+     * sets the RPM of the wheel from target RPM
+     */
     void setRPM() {
         setRPM(targetWheelRpm);
     }
 
+    /**
+     * waits for the RPM to be in tolerance
+     * 
+     * @param maxMs          the longest wait time before braking(in ms)
+     * @param targetWheelRpm the target RPM
+     * @param RPMTolerance   the max tolerance
+     */
     void waitForRPMInTolerance(long maxMs, double targetWheelRpm, double RPMTolerance) {
         long startTime = System.currentTimeMillis();
         while (!robot.stop() && System.currentTimeMillis() - startTime < maxMs) {
@@ -316,10 +459,20 @@ public class Launcher {
         }
     }
 
+    /**
+     * waits for the RPm to be in tolerance from target RPM
+     * 
+     * @param maxMs the longest wait time before braking(in ms)
+     */
     void waitForRPMInTolerance(long maxMs) {
         waitForRPMInTolerance(maxMs, targetWheelRpm, launcherSettings.RPMTolerance);
     }
 
+    /**
+     * moves the servo that controls the launcher arm
+     * 
+     * @param actuatorTime the time it takes the servo to move
+     */
     void moveLaunchServo(long actuatorTime) {
         if (frogLegPos == 0)
             setFrogLegPos(2, false);
@@ -328,29 +481,51 @@ public class Launcher {
         robot.robotHardware.launcherLaunchServo.setPosition(launcherSettings.launcherServoRestAngle);
     }
 
+    /**
+     * moves the servo to open and close the launcher gate
+     * 
+     * @param actuatorTime the time it takes for the gate to open
+     */
     void openGateServo(long actuatorTime) {
         gateOpen = true;
         robot.robotHardware.launcherGateServo.setPosition(launcherSettings.gateServoLaunchAngle);
         robot.delay(actuatorTime);
     }
 
+    /**
+     * moves the servo to open the launcher gate - sets actuator time from
+     * launcherSettings
+     */
     void openGateServo() {
         openGateServo(launcherSettings.gateServoMoveTime);
     }
 
+    /**
+     * moves the servo to open the launcher gate without delay
+     */
     void openGateServoNoDelay() {
         openGateServo(0);
     }
 
+    /**
+     * moves the servo to close the gate
+     */
     void closeGateServo() {
         robot.robotHardware.launcherGateServo.setPosition(launcherSettings.gateServoRestAngle);
         gateOpen = false;
     }
 
+    /**
+     * moves the servo to open and close the launcher gate - actuator time from
+     * launcherSettings
+     */
     void moveLaunchServo() {
         moveLaunchServo(launcherSettings.launcherServoMoveTime);
     }
 
+    /**
+     * automatically opens the gate, shoots a disk, and moves launcher arm back
+     */
     void autoLaunch() {
         if (isRPMInTolerance()) {
             if (!gateOpen)
@@ -363,6 +538,14 @@ public class Launcher {
     /////////////
     // frog legs//
     /////////////
+    /**
+     * sets the frog legs to a certin position
+     * 
+     * @param pos          the poisition of the frog legs (-1 = stowed, 0 = rest, 1
+     *                     = ready, 2 = down)
+     * @param delayBetween whether or not there sould be a delay between opening the
+     *                     2 legs
+     */
     void setFrogLegPos(int pos, boolean delayBetween) {
         if (pos >= 0 && lastfrogLegPos != pos) {
             if (frogLegPos < 0)
@@ -376,10 +559,19 @@ public class Launcher {
         }
     }
 
+    /**
+     * sets the frog legs to the value in frogLegPos
+     * 
+     * @param delayBetween whether or not there sould be a delay between opening the
+     *                     2 legs
+     */
     void setFrogLegPos(boolean delayBetween) {
         setFrogLegPos(frogLegPos, delayBetween);
     }
 
+    /**
+     * opens the frog legs to position 0
+     */
     void initFrogLegs() {
         if (robot.robotUsage.useGrabber)
             robot.grabber.setGrabberToPos(robot.grabber.grabberSettings.straitUpPos, true);
@@ -392,6 +584,11 @@ public class Launcher {
         frogLegPos = 0;
     }
 
+    /**
+     * opens the frog legs to position 0
+     * 
+     * @param useDelay whether the method should wait for the frog legs
+     */
     void unstowFrogLegs(boolean useDelay) {
         if (robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor
                 .getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos)
@@ -404,6 +601,11 @@ public class Launcher {
         frogLegPos = 0;
     }
 
+    /**
+     * closes the frog legs
+     * 
+     * @param useDelay whether the method should wait for the frog legs
+     */
     void stowFrogLegs(boolean useDelay) {
         if (robot.robotUsage.useGrabber && robot.robotHardware.grabberLifterMotor
                 .getCurrentPosition() < robot.grabber.grabberSettings.straitUpPos)
@@ -415,9 +617,11 @@ public class Launcher {
             robot.delay(launcherSettings.timeToCloseFrogLegs);
         frogLegPos = -1;
     }
-
 }// class end
 
+/**
+ * the settings for the launcher
+ */
 class LauncherSettings {
     //////////////////
     // user variables//
@@ -492,6 +696,9 @@ class LauncherSettings {
     }
 }
 
+/**
+ * a clsss that stores all the data points for RPMs
+ */
 class AllCalibrationDataPoints {
     CalibrationDataPoint[] calibrationDataPoints;
 
@@ -499,6 +706,11 @@ class AllCalibrationDataPoints {
         return calibrationDataPoints;
     }
 
+    /**
+     * sets the calibration data points
+     * 
+     * @param calibrationDataPoints the data points
+     */
     public void setCalibrationDataPoints(CalibrationDataPoint[] calibrationDataPoints) {
         this.calibrationDataPoints = calibrationDataPoints;
     }
@@ -546,6 +758,9 @@ class AllCalibrationDataPoints {
         return -1;
     }
 
+    /**
+     * a class that stores the RPMs for the goals at a certin distance
+     */
     class CalibrationDataPoint {
         double distance;
         int[] goalRPMS;
