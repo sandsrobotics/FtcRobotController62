@@ -56,6 +56,12 @@ public class PositionTracker extends Thread {
     Robot robot;
     PositionSettings positionSettings;
 
+    /**
+     * constructor that uses default settings
+     * 
+     * @param robot passed in to allow PositionTracker class to interface and use
+     *              other parts of the robot
+     */
     PositionTracker(Robot robot) {
         positionSettings = new PositionSettings();
         this.robot = robot;
@@ -63,6 +69,13 @@ public class PositionTracker extends Thread {
             initCam();
     }
 
+    /**
+     * constructor that uses custom settings
+     * 
+     * @param robot            passed in to allow PositionTracker class to interface
+     *                         and use other parts of the robot
+     * @param positionSettings the custom settings for the class
+     */
     PositionTracker(Robot robot, PositionSettings positionSettings) {
         this.positionSettings = positionSettings;
         this.robot = robot;
@@ -73,6 +86,11 @@ public class PositionTracker extends Thread {
     //////////
     // angles//
     //////////
+    /**
+     * updates the angles from IMU and adds/scales the Z angle
+     * 
+     * @return the angles to use
+     */
     Orientation updateAngles() {
         Orientation angles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
         angles.thirdAngle *= -1;
@@ -81,13 +99,19 @@ public class PositionTracker extends Thread {
         return angles;
     }
 
+    /**
+     * resets the angle to 0
+     */
     void resetAngle() {
         rotationOffset += currentPosition.R;
     }
 
-    ///////////////////////////
-    // positionTracker finding//
-    ///////////////////////////
+    ///////////
+    // encoder//
+    ///////////
+    /**
+     * updates the position from encoders 
+     */
     void getPosFromEncoder() {
         // get difference
         lastMotorPos = currMotorPos;
@@ -113,9 +137,13 @@ public class PositionTracker extends Thread {
     // distance sensor//
     ///////////////////
 
-    int isRobotInRotationRange()// checks if the current angle is close enough to one of the 90 degree
-                                // increments
-    {
+    /**
+     * checks if the current angle is close enough to one of the 90 degree
+     * increments(returns -2 if it is not in any range)
+     * 
+     * @return which 90 degree incriment is the robot in
+     */
+    int isRobotInRotationRange() {
         if (robot.robotUsage.positionUsage.useDistanceSensors) {
             for (int i = -1; i < 3; i++)
                 if (Math.abs(currentPosition.R - (i * 90)) <= positionSettings.angleTolerance)
@@ -124,10 +152,21 @@ public class PositionTracker extends Thread {
         return -2;
     }
 
+    /**
+     * gets the distance to the closest 90 degree incriment
+     * 
+     * @return distance to the closest 90 degree imcriment
+     */
     private double distanceFromClosestIncrement() {
         return Math.abs(currentPosition.R - (inMeasuringRange * 90));
     }
 
+    /**
+     * updates the position using the distance sensors
+     * 
+     * @param useCorrection whether or not to use correction algorithm to predict
+     *                      obsticals and corrent
+     */
     private void updatePosWithDistanceSensor(boolean useCorrection) {
         if (inMeasuringRange > -2) {
             sleepTillNextSensorReading();
@@ -157,7 +196,6 @@ public class PositionTracker extends Thread {
             /*
              * if (useCorrection) { for (int i = 0; i < 2; i++) { if (Math.abs(calcDis[i] -
              * currentPosition[i]) > positionSettings.maxPositionChange[i]) return; } }
-             * 
              */
 
             distSensorPosition.X = calcDis[0];
@@ -166,12 +204,22 @@ public class PositionTracker extends Thread {
         }
     }
 
+    /**
+     * waits until the minimum delay between readings is up and then updates the
+     * sensor selected
+     * 
+     * @param sensor the sensor you want to update
+     */
     private void updateDistanceSensor(int sensor) {
         sleepTillNextSensorReading();
         robot.robotHardware.distSensors.get(sensor - 1).measureRange();
         lastSensorReadingTime = System.currentTimeMillis();
     }
 
+    /**
+     * waits until the time since last reading is greater than or equal to the
+     * minimum sensor reading delay
+     */
     private void sleepTillNextSensorReading() {
         int timeTillNextRead = positionSettings.minDelayBetweenSensorReadings
                 - (int) (System.currentTimeMillis() - lastSensorReadingTime);
@@ -183,6 +231,9 @@ public class PositionTracker extends Thread {
     //////////
     // camera//
     //////////
+    /**
+     * creates and starts a new T256Camera object from settings in positionSettings
+     */
     void initCam() {
         if (slamra == null)
             slamra = new T265Camera(positionSettings.cameraToRobot, positionSettings.encoderMeasurementCovariance,
@@ -190,6 +241,11 @@ public class PositionTracker extends Thread {
         slamra.start();
     }
 
+    /**
+     * sets the current position of the camera(except for rotation)
+     * 
+     * @param pos the position you want to set the camera to
+     */
     void setCurrentCamPos(Position pos) {
         Position curPos = getPositionFromCam();
         cameraOffset.X = -curPos.X + pos.X;
@@ -197,6 +253,11 @@ public class PositionTracker extends Thread {
         // cameraOffset.R = -curPos.R + pos.R;
     }
 
+    /**
+     * returns the position from the camera(converted to inches without offset)
+     * 
+     * @return position from the camera
+     */
     private Position getPositionFromCam() {
         T265Camera.CameraUpdate camera = slamra.getLastReceivedCameraUpdate();
         if (camera == null)
@@ -205,12 +266,18 @@ public class PositionTracker extends Thread {
                 camera.pose.getTranslation().getX() / Constants.mPerInch, -camera.pose.getRotation().getDegrees());
     }
 
+    /**
+     * updates position from camera and adds offset
+     */
     void getPosFromCam() {
         Position pos = getPositionFromCam();
         pos.add(cameraOffset);
         cameraPosition = pos;
     }
 
+    /**
+     * stops the camera
+     */
     void endCam() {
         slamra.stop();
     }
@@ -218,6 +285,11 @@ public class PositionTracker extends Thread {
     /////////
     // files//
     /////////
+    /**
+     * gets the last saved position on file
+     * 
+     * @return last saved position
+     */
     public Position getPositionFromFile() {
         String val = FileManager.readFromFile(fileName, AppUtil.getDefContext());
         try {
@@ -228,6 +300,9 @@ public class PositionTracker extends Thread {
         }
     }
 
+    /**
+     * writes the current position to a file
+     */
     void writePositionToFile() {
         FileManager.writeToFile(fileName, currentPosition.X + "," + currentPosition.Y + "," + currentPosition.R,
                 AppUtil.getDefContext());
@@ -236,17 +311,34 @@ public class PositionTracker extends Thread {
     //////////////////
     // runs in thread//
     //////////////////
+    /**
+     * sets the current position and camera position
+     * 
+     * @param pos the position you want to set
+     */
     void setCurrentPosition(Position pos) {
         currentPosition = pos.clone();
         if (robot.robotUsage.positionUsage.useCamera)
             setCurrentCamPos(currentPosition);
     }
 
+    /**
+     * sets the current position and camera position without rotation
+     * 
+     * @param pos the position you want to set - no rotation
+     */
+
     void setCurrentPositionNoRot(Position pos) {
         pos.R = currentPosition.R;
         setCurrentPosition(pos);
     }
 
+    /**
+     * gets the start position based on startPosMode(0 = origin, 1 =
+     * positionSettings.startPos, 2 = position from file)
+     * 
+     * @return the start position
+     */
     Position getStartPos() {
         if (positionSettings.startPosMode != 1)
             positionSettings.startPos = new Position();
@@ -258,16 +350,25 @@ public class PositionTracker extends Thread {
         return positionSettings.startPos;
     }
 
+    /**
+     * starts the encoder tracking by setting the current motor position
+     */
     void initializeEncoderTracking() {
         currMotorPos = robot.robotHardware.getMotorPositionsList(robot.robotHardware.driveMotors);
     }
 
+    /**
+     * updates the roataion from IMU
+     */
     void updateRot() {
         currentAngularVelocity = robot.imu.getAngularVelocity();
         currentAllAxisRotations = updateAngles();
         currentPosition.R = currentAllAxisRotations.thirdAngle;
     }
 
+    /**
+     * updates everything and compares the position from all trackers to make an avarage
+     */
     void updateAllPos() {
 
         // get positions
@@ -314,6 +415,9 @@ public class PositionTracker extends Thread {
             currentPosition = encoderPosition;
     }
 
+    /**
+     * initializes the position trackers and sets the start positon
+     */
     void initAll() {
         setCurrentPosition(getStartPos());
         if (robot.robotUsage.positionUsage.useEncoders)
@@ -321,6 +425,9 @@ public class PositionTracker extends Thread {
         isInitialized = true;
     }
 
+    /**
+     * the main method that runs in the thread - it controls everything and constantly updates the position
+     */
     @Override
     public void run() {
         initAll();
@@ -372,19 +479,43 @@ public class PositionTracker extends Thread {
     ///////////////////
     // pos with offset//
     ///////////////////
+    /**
+     * gets the current position plus offsets as an array
+     * @param X the x offset
+     * @param Y the y offset
+     * @param R the rotation offset
+     * @return a length 3 array with the current + offset position
+     */
     double[] getPositionWithOffsetArray(double X, double Y, double R) {
         return new double[] { currentPosition.X + X, currentPosition.Y + Y, currentPosition.R + R };
     }
 
+    /**
+     * gets the current position plus offsets as an array
+     * @param offset the offsets for each axis
+     * @return a length 3 array with the current + offset position
+     */
     double[] getPositionWithOffsetArray(Position offset) {
         return new double[] { currentPosition.X + offset.X, currentPosition.Y + offset.Y,
                 currentPosition.R + offset.R };
     }
 
+    /**
+     * gets the current position plus offsets as a Position object
+     * @param X the x offset
+     * @param Y the y offset
+     * @param R the r offset
+     * @return a Position object with current position + offset
+     */
     Position getPositionWithOffset(double X, double Y, double R) {
         return new Position(currentPosition.X + X, currentPosition.Y + Y, currentPosition.R + R);
     }
 
+    /**
+     * gets the current position plus offsets as a Position object
+     * @param offset the offsets for each axis
+     * @return a Position object with current position + offset
+     */
     Position getPositionWithOffset(Position offset) {
         return new Position(currentPosition.X + offset.X, currentPosition.Y + offset.Y, currentPosition.R + offset.R);
     }
@@ -392,11 +523,17 @@ public class PositionTracker extends Thread {
     ///////////////
     // stop thread//
     ///////////////
+    /**
+     * inturups position thread to stop trackers and run ending tasks
+     */
     void stopPosition() {
         this.interrupt();
     }
 }
 
+/**
+ * stores all the settings for Position class
+ */
 @Config
 class PositionSettings {
     //////////////////
@@ -448,15 +585,28 @@ class PositionSettings {
     }
 }
 
+/**
+ * container to store and manipulate a position(X, Y, R)
+ */
 class Position {
     double X, Y, R;
 
+    /**
+     * constructor to make position from 3 values
+     * @param X the x value
+     * @param Y the y value
+     * @param R the rotation value
+     */
     Position(double X, double Y, double R) {
         this.X = X;
         this.Y = Y;
         this.R = R;
     }
 
+    /**
+     * constructor to make position from array
+     * @param vals the values for each axis - uses first 3 indexes
+     */
     Position(double[] vals) {
         try {
             this.X = vals[0];
@@ -466,12 +616,19 @@ class Position {
         }
     }
 
+    /**
+     * constructor to make position at origin with all values as 0
+     */
     Position() {
         X = 0;
         Y = 0;
         R = 0;
     }
 
+    /**
+     * convert position to double array
+     * @return lenth 3 array with position
+     */
     double[] toArray() {
         try {
             return new double[] { X, Y, R };
@@ -480,6 +637,10 @@ class Position {
         }
     }
 
+    /**
+     * swap the x and y axis - same as rotate 90
+     * @return position with swaped axis
+     */
     Position switchXY() {
         return new Position(Y, X, R);
     }
@@ -566,10 +727,16 @@ class Position {
     }
 }
 
+/**
+ * enum with math signs - for ultrasonic sensors
+ */
 enum MathSign {
     ADD, SUBTRACT
 }
 
+/**
+ * enum with sensor numbers - for ultrasonic sensors
+ */
 enum SensorNum {
     ONE, TWO
 }
