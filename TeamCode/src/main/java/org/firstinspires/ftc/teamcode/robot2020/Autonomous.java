@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.robot2020;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 // test
+@Disabled
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "test auto v1")
 public class Autonomous extends LinearOpMode {

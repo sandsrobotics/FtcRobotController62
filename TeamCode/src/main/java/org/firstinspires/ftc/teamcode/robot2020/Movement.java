@@ -179,7 +179,7 @@ public class Movement
 
     void teleOpTelemetry()
     {
-        robot.addTelemetry("rot", robot.positionTracker.currentPosition.R);
+        if(robot.positionTracker!= null) robot.addTelemetry("rot", robot.positionTracker.currentPosition.R);
     }
 
     /*

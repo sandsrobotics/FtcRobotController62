@@ -69,8 +69,10 @@ public class Robot
         if(robotUsage.visionUsage.useVision) vision = new Vision(this, robotSettingsMain.visionSettings);
         if(robotUsage.useLauncher) launcher = new Launcher(this, robotSettingsMain.launcherSettings);
         if(robotUsage.useComplexMovement) complexMovement = new ComplexMovement(this);
-        if(robotUsage.useGrabber){ grabber = new Grabber(this, robotSettingsMain.grabberSettings);
-        addTelemetry("grabber", " init");}
+        if(robotUsage.useGrabber){
+            grabber = new Grabber(this, robotSettingsMain.grabberSettings);
+            addTelemetry("grabber", " init");
+        }
 
         initHardware();
         if(robotUsage.useDrive || (robotUsage.positionUsage.usePosition && robotUsage.positionUsage.useEncoders) || robotUsage.useComplexMovement) robotHardware.initDriveMotors();

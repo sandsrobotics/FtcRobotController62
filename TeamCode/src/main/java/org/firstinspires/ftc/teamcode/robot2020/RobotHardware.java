@@ -318,7 +318,7 @@ public class RobotHardware
     }
 }
 
-class HardwareSettings
+class  HardwareSettings
 {
     //////////////////
     //user variables//
